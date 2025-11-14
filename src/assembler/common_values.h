@@ -24,19 +24,22 @@ enum Atom_Type {
 
 // return value for blueprint functions
 enum Grammar_Retval {
-        GOOD,
         EXPECTED_MNEMONIC,
-        MISSING_ARGUMENTS,
+        ACCEPTABLE,
         INVALID_ATOM,
+        MISSING_ARGUMENTS,
+        MISSING_EXIT,
+        MISSING_MAIN,
+        UNKNOWN_LABEL,
 };
 
 // return value for translation functions
 enum Assembler_Retval {
-        COMPLETE,
-        MISSING_MAIN,
-        UNKNOWN_LABEL,
-        UNKNOWN_MNEMONIC,
-        MISSING_ARGUMENTS_2
+        ACCEPTABLE_2,
+        EXPECTED_MNEMONIC_2,
+        UNKNOWN_LABEL_2,
+        MISSING_ARGUMENTS_2,
+        MISSING_MAIN_2,
 };
 
 // to pass debug info through syntax checking functions
@@ -51,33 +54,33 @@ public:
 // instruction argument types
 // leaving mnemonic here so that loop in is_valid_arguments works nicer
 const std::map<std::string, std::vector<Atom_Type>> BLUEPRINTS = {
-        {"NOP",    {MNEMONIC                  } },
-        {"CALL",   {MNEMONIC, LABEL           } },
-        {"RET",    {MNEMONIC                  } },
-        {"PRINT",  {MNEMONIC, SOURCE          } },
-        {"SPRINT", {MNEMONIC, LITERAL_STR     } },
-        {"EXIT",   {MNEMONIC                  } },
-        {"READ",   {MNEMONIC, REGISTER, LABEL } },
-        {"WRITE",  {MNEMONIC, SOURCE,   LABEL } },
-        {"POP",    {MNEMONIC, REGISTER        } },
-        {"PUSH",   {MNEMONIC, SOURCE          } },
-        {"MOV",    {MNEMONIC, REGISTER, SOURCE} },
-        {"ADD",    {MNEMONIC, REGISTER, SOURCE} },
-        {"SUB",    {MNEMONIC, REGISTER, SOURCE} },
-        {"MUL",    {MNEMONIC, REGISTER, SOURCE} },
-        {"DIV",    {MNEMONIC, REGISTER, SOURCE} },
-        {"AND",    {MNEMONIC, REGISTER, SOURCE} },
-        {"OR",     {MNEMONIC, REGISTER, SOURCE} },
-        {"XOR",    {MNEMONIC, REGISTER, SOURCE} },
-        {"LSH",    {MNEMONIC, REGISTER, SOURCE} },
-        {"RSH",    {MNEMONIC, REGISTER, SOURCE} },
-        {"CMP",    {MNEMONIC, SOURCE,   SOURCE} },
-        {"JEQ",    {MNEMONIC, LABEL           } },
-        {"JNE",    {MNEMONIC, LABEL           } },
-        {"JGE",    {MNEMONIC, LABEL           } },
-        {"JGR",    {MNEMONIC, LABEL           } },
-        {"JLE",    {MNEMONIC, LABEL           } },
-        {"JLS",    {MNEMONIC, LABEL           } },
+        {"NOP",    {MNEMONIC                        } },
+        {"CALL",   {MNEMONIC, LABEL                 } },
+        {"RET",    {MNEMONIC                        } },
+        {"PRINT",  {MNEMONIC, SOURCE                } },
+        {"SPRINT", {MNEMONIC, LITERAL_STR           } },
+        {"EXIT",   {MNEMONIC                        } },
+        {"READ",   {MNEMONIC, REGISTER, LITERAL_INT } },
+        {"WRITE",  {MNEMONIC, SOURCE,   LITERAL_INT } },
+        {"POP",    {MNEMONIC, REGISTER              } },
+        {"PUSH",   {MNEMONIC, SOURCE                } },
+        {"MOV",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"ADD",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"SUB",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"MUL",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"DIV",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"AND",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"OR",     {MNEMONIC, REGISTER, SOURCE      } },
+        {"XOR",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"LSH",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"RSH",    {MNEMONIC, REGISTER, SOURCE      } },
+        {"CMP",    {MNEMONIC, SOURCE,   SOURCE      } },
+        {"JEQ",    {MNEMONIC, LABEL                 } },
+        {"JNE",    {MNEMONIC, LABEL                 } },
+        {"JGE",    {MNEMONIC, LABEL                 } },
+        {"JGR",    {MNEMONIC, LABEL                 } },
+        {"JLE",    {MNEMONIC, LABEL                 } },
+        {"JLS",    {MNEMONIC, LABEL                 } },
 };
 
 #endif

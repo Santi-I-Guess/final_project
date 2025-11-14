@@ -12,11 +12,11 @@ Debug_Info generate_program(std::vector<int16_t> &result,
                             std::deque<std::string> tokens,
                             std::map<std::string, int16_t> label_table) {
         Debug_Info context;
-        context.assembler_retval = COMPLETE;
+        context.assembler_retval = ACCEPTABLE_2;
 
         int16_t instruction_idx = 0, program_idx = 0;
         if (label_table.find("main") == label_table.end()) {
-                context.assembler_retval = MISSING_MAIN;
+                context.assembler_retval = MISSING_MAIN_2;
                 return context;
         }
         // because of this entry address, all label translations will
@@ -26,7 +26,7 @@ Debug_Info generate_program(std::vector<int16_t> &result,
                 if (BLUEPRINTS.find(tokens.front()) == BLUEPRINTS.end()) {
                         context.relevant_idx = instruction_idx;
                         context.relevant_tokens = {tokens.front()};
-                        context.assembler_retval = UNKNOWN_MNEMONIC;
+                        context.assembler_retval = EXPECTED_MNEMONIC_2;
                         return context;
                 }
                 // is intentionally duplicate: see main.cpp usage of MISSING_ARGUMENTS_2

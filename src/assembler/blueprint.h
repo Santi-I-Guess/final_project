@@ -21,4 +21,5 @@ bool is_valid_i16(std::string token);
 bool is_valid_atom(Atom_Type atom_type, std::string token);
 
 // first program syntax check function
-Debug_Info is_valid_arguments(std::deque<std::string> tokens);
+Debug_Info is_valid_arguments(std::deque<std::string> tokens,
+                              std::map<std::string, int16_t> label_table);

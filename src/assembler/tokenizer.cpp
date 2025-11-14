@@ -35,7 +35,7 @@ size_t get_token_len(size_t i, std::string source_buffer) {
 
 bool is_identifier_char(const char i) {
         // equivalent regex pattern: [$%|a-zA-Z0-9_]
-        if (i == '$' || i == '%' || i == ':' || i == '_')
+        if (i == '$' || i == '%' || i == ':' || i == '_' || i == '-')
                 return true;
         if (isalnum(i))
                 return true;

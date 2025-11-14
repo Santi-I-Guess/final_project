@@ -75,21 +75,15 @@ int main(int argc, char **argv) {
                                 return 1;
                         }
                 }
-                Debug_Info res = is_valid_arguments(tokens);
+                Debug_Info res = is_valid_arguments(tokens, label_table);
                 switch (res.grammar_retval) {
-                case GOOD:
+                case ACCEPTABLE:
                         break;
                 case EXPECTED_MNEMONIC:
                         std::cout << "--- Grammar Error ---\n";
                         std::cout << "Expected mnemonic\n";
                         std::cout << "Instruction #" << res.relevant_idx << "\n";
                         std::cout << "Actual Symbol: " << res.relevant_tokens.at(0) << "\n";
-                        return 0;
-                case MISSING_ARGUMENTS:
-                        std::cout << "--- Grammar Error ---\n";
-                        std::cout << "Missing arguments\n";
-                        std::cout << "Instruction #" << res.relevant_idx << "\n";
-                        std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
                         return 0;
                 case INVALID_ATOM:
                         std::cout << "--- Grammar Error ---\n";
@@ -98,17 +92,38 @@ int main(int argc, char **argv) {
                         std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
                         std::cout << "Invalid symbol: " << res.relevant_tokens.at(1) << "\n";
                         return 0;
+                case MISSING_ARGUMENTS:
+                        std::cout << "--- Grammar Error ---\n";
+                        std::cout << "Missing arguments\n";
+                        std::cout << "Instruction #" << res.relevant_idx << "\n";
+                        std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
+                        return 0;
+                case MISSING_EXIT:
+                        std::cout << "--- Grammar Error ---\n";
+                        std::cout << "Missing EXIT instruction\n";
+                        return 0;
+                case MISSING_MAIN:
+                        std::cout << "--- Grammar Error ---\n";
+                        std::cout << "Missing MAIN label\n";
+                        return 0;
+                case UNKNOWN_LABEL:
+                        std::cout << "--- Grammar Error ---\n";
+                        std::cout << "Attempted to call unknown label\n";
+                        std::cout << "Instruction #" << res.relevant_idx << "\n";
+                        std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
+                        std::cout << "Invalid symbol: " << res.relevant_tokens.at(1) << "\n";
+                        return 0;
                 }
 
                 res = generate_program(final_program, tokens, label_table);
                 switch (res.assembler_retval) {
-                case COMPLETE:
+                case ACCEPTABLE_2:
                         break;
-                case MISSING_MAIN:
+                case MISSING_MAIN_2:
                         std::cout << "--- Assembler Error ---\n";
                         std::cout << "Main label was never defined\n";
                         return 0;
-                case UNKNOWN_LABEL:
+                case UNKNOWN_LABEL_2:
                         std::cout << "--- Assembler Error ---\n";
                         std::cout << "Label is undefined\n";
                         std::cout << "Token #" << res.relevant_idx << "\n";
@@ -116,7 +131,7 @@ int main(int argc, char **argv) {
                         std::cout << res.relevant_tokens.at(0) << " ";
                         std::cout << res.relevant_tokens.at(1) << "\n";
                         return 0;
-                case UNKNOWN_MNEMONIC:
+                case EXPECTED_MNEMONIC_2:
                         std::cout << "--- Assembler Error ---\n";
                         std::cout << "Mnemonic is undefined\n";
                         std::cout << "Instruction #" << res.relevant_idx << "\n";
@@ -129,6 +144,7 @@ int main(int argc, char **argv) {
                         std::cout << "Missing arguments\n";
                         std::cout << "Instruction #" << res.relevant_idx << "\n";
                         std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
+                        return 0;
                 }
 
                 if (life_opts.intermediate_files) {

@@ -78,11 +78,32 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
 }
 
 
-Debug_Info is_valid_arguments(std::deque<std::string> tokens) {
-        // std::deque::pop_front makes std::vector::erase irrelevant,
-        //      saving on unnecesary copies
+Debug_Info is_valid_arguments(std::deque<std::string> tokens,
+                              std::map<std::string, int16_t> label_table) {
+        // std::deque::pop_front makes std::vector::erase irrelevant
+        // (saves on copies)
+
         Debug_Info context;
-        context.grammar_retval = GOOD;
+        context.grammar_retval = ACCEPTABLE;
+        // check if program has entry point
+        if (label_table.find("main") == label_table.end()) {
+                context.grammar_retval = MISSING_MAIN;
+                return context;
+        }
+        // make sure there's at least one EXIT instruction
+        bool seen_exit = false;
+        for (std::string i : tokens) {
+                if (i == "EXIT") {
+                        seen_exit = true;
+                        break;
+                }
+        }
+        if (!seen_exit) {
+                context.grammar_retval = MISSING_EXIT;
+                return context;
+        }
+
+        // map has std::map::find, which makes checking easy
         int instruction_idx = 0;
         while (!tokens.empty()) {
                 std::deque<std::string> curr_ins = {};
@@ -105,6 +126,14 @@ Debug_Info is_valid_arguments(std::deque<std::string> tokens) {
                                 context.relevant_tokens = {tokens.at(0), tokens.at(i)};
                                 context.grammar_retval = INVALID_ATOM;
                                 return context;
+                        }
+                        bool lbl_chk_1 = curr_blueprint.at(i) == LABEL;
+                        bool lbl_chk_2 = label_table.find(tokens.at(i))
+                                == label_table.end();
+                        if (lbl_chk_1 && lbl_chk_2) {
+                                context.relevant_idx = instruction_idx;
+                                context.relevant_tokens = {tokens.at(0), tokens.at(i)};
+                                context.grammar_retval = UNKNOWN_LABEL;
                         }
                 }
                 for (size_t i = 0; i < curr_blueprint.size(); ++i)
