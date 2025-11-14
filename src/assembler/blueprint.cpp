@@ -1,0 +1,114 @@
+#include <cstdint>
+#include <deque>
+#include <map>
+#include <string>
+#include <sstream>
+
+#include "blueprint.h"
+#include "common_values.h"
+
+std::map<std::string, int16_t> define_labels(std::deque<std::string> &tokens) {
+        std::map<std::string, int16_t> symbols = {};
+        std::deque<std::string> filtered_tokens = {}; // remove label definitions
+        size_t program_addr = 0;
+        for (std::string curr_token: tokens) {
+                if (curr_token.back() != ':') {
+                        filtered_tokens.push_back(curr_token);
+                        program_addr++;
+                        continue;
+                }
+                curr_token.pop_back();
+                if (symbols.find(curr_token) == symbols.end())
+                        symbols.insert({curr_token, (int16_t)program_addr});
+                else
+                        symbols[curr_token] = (int16_t)program_addr;
+        }
+        tokens.swap(filtered_tokens);
+        return symbols;
+}
+
+bool is_valid_i16(std::string token) {
+        token = token.substr(1, token.length()-1);
+        std::stringstream the_stream(token);
+        int32_t value = 0;
+        the_stream >> token;
+        if (the_stream.fail())
+                return false;
+        if (value > (int32_t)INT16_MAX)
+                return false;
+        if (value < (int32_t)INT16_MIN)
+                return false;
+        return true;
+}
+
+bool is_valid_atom(Atom_Type atom_type, std::string token) {
+        bool first, second, third;
+        switch (atom_type) {
+        case LABEL:
+                // easier to check in later function call
+                return true;
+        case LITERAL_INT:
+                if (token.front() != '$')
+                        return false;
+                return is_valid_i16(token);
+        case LITERAL_STR:
+                first = token.front() == token.back();
+                second = token.front() == '\"';
+                return first && second;
+        case MNEMONIC:
+                return BLUEPRINTS.find(token) != BLUEPRINTS.end();
+        case REGISTER:
+                first = token.length() == 2;
+                second = token.front() == 'R';
+                third = 'A' <= token.back() && token.back() <= 'H';
+                return first && second && third;
+        case SOURCE:
+                if (is_valid_atom(LITERAL_INT, token))
+                        return true;
+                if (is_valid_atom(REGISTER, token))
+                        return true;
+                return is_valid_atom(STACK_OFFSET, token);
+        case STACK_OFFSET:
+                if (token.front() != '%')
+                        return false;
+                return is_valid_i16(token.substr(1, token.length() - 1));
+        }
+        return true;
+}
+
+
+Debug_Info is_valid_arguments(std::deque<std::string> tokens) {
+        // std::deque::pop_front makes std::vector::erase irrelevant,
+        //      saving on unnecesary copies
+        Debug_Info context;
+        context.grammar_retval = GOOD;
+        int instruction_idx = 0;
+        while (!tokens.empty()) {
+                std::deque<std::string> curr_ins = {};
+                if (BLUEPRINTS.find(tokens.front()) == BLUEPRINTS.end()) {
+                        context.relevant_idx = instruction_idx;
+                        context.relevant_tokens = {tokens.front()};
+                        context.grammar_retval = EXPECTED_MNEMONIC;
+                        return context;
+                }
+                std::vector<Atom_Type> curr_blueprint = BLUEPRINTS.at(tokens.front());
+                if (tokens.size() < curr_blueprint.size()) {
+                        context.relevant_idx = instruction_idx;
+                        context.relevant_tokens = {tokens.front()};
+                        context.grammar_retval = MISSING_ARGUMENTS;
+                        return context;
+                }
+                for (size_t i = 0; i < curr_blueprint.size(); ++i) {
+                        if (!is_valid_atom(curr_blueprint.at(i), tokens.at(i))) {
+                                context.relevant_idx = instruction_idx;
+                                context.relevant_tokens = {tokens.at(0), tokens.at(i)};
+                                context.grammar_retval = INVALID_ATOM;
+                                return context;
+                        }
+                }
+                for (size_t i = 0; i < curr_blueprint.size(); ++i)
+                        tokens.pop_front();
+                instruction_idx++;
+        }
+        return context;
+}
