@@ -1,4 +1,7 @@
 # to ignore executable files
+*
+!*/
+!*.*
 build/*
 resources/*
 *.txt
