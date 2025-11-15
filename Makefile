@@ -56,8 +56,10 @@ else
 endif
 
 # note to self: apparently, make evaluates all variables before
-# it runs the lines, instead of the more rational line-by-line substitution
+# it goes through targets and rules, so i must have all objects (from
+# differing source files) determined
 all:
+	mkdir -p build
 	make -C src/assembler
 	make -C src/misc
 	$(CXX) $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN) \
