@@ -41,7 +41,7 @@ bool is_valid_i16(std::string token) {
 }
 
 bool is_valid_atom(Atom_Type atom_type, std::string token) {
-        bool first, second, third;
+        bool first, second;
         switch (atom_type) {
         case LABEL:
                 // easier to check in later function call
@@ -58,10 +58,7 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
         case MNEMONIC:
                 return BLUEPRINTS.find(token) != BLUEPRINTS.end();
         case REGISTER:
-                first = token.length() == 2;
-                second = token.front() == 'R';
-                third = 'A' <= token.back() && token.back() <= 'H';
-                return first && second && third;
+                return REGISTER_TABLE.find(token) != REGISTER_TABLE.end();
         case SOURCE:
                 if (is_valid_atom(LITERAL_INT, token))
                         return true;

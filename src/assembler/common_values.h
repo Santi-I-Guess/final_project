@@ -83,4 +83,22 @@ const std::map<std::string, std::vector<Atom_Type>> BLUEPRINTS = {
         {"JLS",    {MNEMONIC, LABEL                 } },
 };
 
+// valid register symbols
+const std::map<std::string, int16_t> REGISTER_TABLE = {
+        {"RA", 0}, {"RB", 1}, {"RC", 2}, {"RD", 3},
+        {"RE", 4}, {"RF", 5}, {"RG", 6}, {"RH", 7},
+        {"RSP", 8}, {"RIP", 9}
+};
+
+// opcode for each instruction mnemonic
+const std::map<std::string, int16_t> OPCODE_TABLE = {
+        {"NOP",    0}, {"CALL",  1}, {"RET",   2}, {"PRINT",  3},
+        {"SPRINT", 4}, {"EXIT",  5}, {"READ",  6}, {"WRITE",  7},
+        {"POP",    8}, {"PUSH",  9}, {"MOV",  10}, {"ADD",   11},
+        {"SUB",   12}, {"MUL",  13}, {"DIV",  14}, {"AND",   15},
+        {"OR",    16}, {"XOR",  17}, {"LSH",  18}, {"RSH",   19},
+        {"CMP",   20}, {"JEQ",  21}, {"JNE",  22}, {"JGE",   23},
+        {"JGR",   24}, {"JLE",  25}, {"JLS",  26},
+};
+
 #endif

@@ -7,6 +7,13 @@ some changes to make usage simple.
 
 # Quick Reference
 
+## Assembler Flags
+- -c, --compile-only
+- -h, --help
+- -s, --save-temps
+- -b, --binary-input
+- -p, --print-step
+
 ## Assembly Language
 - 16 bit registers
 - 8 general purpose registers, 2 comparison registers (nonaccessable)
@@ -15,6 +22,7 @@ some changes to make usage simple.
 - can print integer values with PRINT, and string literals with SPRINT
 - can define labels with \<string\>:
 - can access stack without pop using stack offset notation (see below)
+- can access stack pointer with RSP, and the instruction counter with RIP
 
 ## Instructions
 | **Mnemonic** | **Arg 1** | **Arg 2** | **Arg 3** |
@@ -60,3 +68,10 @@ Note: "$" in this case is not the start of a string, but the literal character \
 \<addr\> ::= [:digit:]\+ \
 \<label\> ::= .\+ \
 \<string\> ::= ".+"
+
+## Other quirks
+- every program is required to have a main label and at least one EXIT instruction
+- SPRINT supports newlines and escaped double quotes
+- there are 2048 addresses allotted to the program simulation
+- the stack occupies the last 512 elements of RAM block, where the address
+  1536 corresponds to %0 when no elements are on the stack
