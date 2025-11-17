@@ -1,7 +1,7 @@
 # Two cars in every pot and a chicken in every garage.
 
 PROJECT = final_project
-SRC_DIRS  = src src/assembler src/misc src/simulator
+SRC_DIRS  = src/assembler src/misc src/simulator src
 SRC_FILES = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.cpp))
 H_FILES   = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h))
 REZ_FILES = resources/pseudo_assembly_assembler.png
@@ -16,8 +16,6 @@ CXXFLAGS_DEBUG = -g
 CXXFLAGS_WARN  = -Wall -Werror -Wextra -Wconversion -Wdouble-promotion \
 				 -Wunreachable-code -Wshadow -Wpedantic
 CPPVERSION = -std=c++17
-
-OBJECTS = $(SRC_FILES:src/%.cpp=build/%.o)
 
 ARCHIVE_EXTENSION = zip
 
@@ -40,17 +38,22 @@ else
 	ZIP_NAME = $(PROJECT)_$(USERNAME).$(ARCHIVE_EXTENSION)
 endif
 
+
+# needs to stay like this for suffix rule to work properly
+OBJECTS = $(SRC_FILES:src/%.cpp=build/%.o)
+
 all: $(TARGET)
 
+# We use objects in the rule dependencies, but not the g++ call,
+# since OBJECTS holds the build paths before the text replacement
 $(TARGET): $(OBJECTS)
-	$(CXX) -o $@ $^
+	$(CXX) -o $@  $(wildcard build/*.o)
 
-# note to self: $^ is all targets, $< is first target
-# you know what? this is probably more readable than whatever solution
-# 20 hours of reading Makefile documenation would yield
+# eval: the cheap trick to runtime evaluation
 build/%.o: src/%.cpp
-	@echo $@ "<=" $^
-	@$(CXX) $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN) -o $@ -c $<
+	$(eval TMP = $(shell echo $^ | sed "s/.*\/\([a-z_]\+\).cpp/build\/\1.o/"))
+	@echo "$(TMP) <- $<"
+	@$(CXX) $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN) -o $(TMP) -c $<
 
 clean:
 	$(DEL) $(TARGET) $(OBJECTS)
