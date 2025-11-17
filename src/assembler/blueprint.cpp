@@ -77,7 +77,7 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
 
 Debug_Info is_valid_arguments(std::deque<std::string> tokens,
                               std::map<std::string, int16_t> label_table) {
-        // std::deque::pop_front makes std::vector::erase irrelevant
+        // std::deque::pop_front makes std::deque::erase irrelevant
         // (saves on copies)
 
         Debug_Info context;
@@ -108,10 +108,9 @@ Debug_Info is_valid_arguments(std::deque<std::string> tokens,
                         context.grammar_retval = EXPECTED_MNEMONIC;
                         return context;
                 }
-                std::vector<Atom_Type> curr_blueprint;
-                curr_blueprint.reserve(4); /* prevent werid uninit data */
+                std::deque<Atom_Type> curr_blueprint;
                 curr_blueprint = BLUEPRINTS.at(tokens.front());
-                // curr_blueprint.shrink_to_fit();
+                curr_blueprint.shrink_to_fit(); /* prevent werid uninit data */
                 if (tokens.size() < curr_blueprint.size()) {
                         context.relevant_idx = instruction_idx;
                         context.relevant_tokens = {tokens.front()};

@@ -2,10 +2,9 @@
 #define CMD_LINE_OPTS_H 1
 
 #include <cstdint>
+#include <deque>
 #include <string>
 #include <map>
-#include <vector>
-#include <deque>
 
 // handles cmd line inputs and flags
 struct Cmd_Options {

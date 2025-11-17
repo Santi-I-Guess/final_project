@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
         // put assembled program here, so that assembler.h doesn't require
         // cpu_handle
-        std::vector<int16_t> final_program = {};
+        std::deque<int16_t> final_program = {};
 
         std::string source_path = argv[life_opts.input_file_idx];
         if (life_opts.is_binary_input) {

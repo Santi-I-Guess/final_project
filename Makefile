@@ -1,37 +1,24 @@
-
-# note to self: manually update SRC_FILES and H_FILES when done
-# note to self: it almost looks like SRC_FILES and H_FILES aren't
-# properly being defined...
+# Two cars in every pot and a chicken in every garage.
 
 PROJECT = final_project
-SRC_FILES = src/misc/file_handling.cpp \
-			src/misc/cmd_line_opts.cpp \
-			src/main.cpp \
-			src/assembler/tokenizer.cpp \
-			src/assembler/translation.cpp \
-			src/assembler/blueprint.cpp
-H_FILES = src/misc/file_handling.h \
-		  src/misc/cmd_line_opts.h \
-		  src/assembler/blueprint.h \
-		  src/assembler/translation.h \
-		  src/assembler/common_values.h \
-		  src/assembler/tokenizer.h
-REZ_FILES =
+SRC_DIRS  = src src/assembler src/misc src/simulator
+SRC_FILES = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.cpp))
+H_FILES   = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h))
+REZ_FILES = resources/pseudo_assembly_assembler.png
 USERNAME  = santiago_sagastegui
 
-BUILD_DIR = build
+# use of sed and echo in template makefile implies dos systems have access
+# to sed and echo. I think foreach is a native make command, so I don't have
+# to worry about cross system compatibility there
 
 CXX = g++
 CXXFLAGS_DEBUG = -g
 CXXFLAGS_WARN  = -Wall -Werror -Wextra -Wconversion -Wdouble-promotion \
 				 -Wunreachable-code -Wshadow -Wpedantic
 CPPVERSION = -std=c++17
-OBJECTS = build/blueprint.o \
-		  build/cmd_line_opts.o \
-		  build/file_handling.o \
-		  build/main.o \
-		  build/tokenizer.o \
-		  build/translation.o
+
+OBJECTS = $(SRC_FILES:src/%.cpp=build/%.o)
+
 ARCHIVE_EXTENSION = zip
 
 ifeq ($(shell echo "Windows"), "Windows")
@@ -53,38 +40,36 @@ else
 	ZIP_NAME = $(PROJECT)_$(USERNAME).$(ARCHIVE_EXTENSION)
 endif
 
-# note to self: apparently, make evaluates all variables before
-# it goes through targets and rules, so i must have all objects (from
-# differing source files) determined
-all:
-	make -C src/assembler
-	make -C src/misc
-	$(CXX) $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN) \
-		-o build/main.o -c src/main.cpp
-	$(CXX) -o $(TARGET) $(OBJECTS)
+all: $(TARGET)
 
-# $(CXX) $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN) -o $@ -c $<
+$(TARGET): $(OBJECTS)
+	$(CXX) -o $@ $^
 
-# how do i automatically compile OBJECTS_2 and OBJECTS_3 without
-# redefining build/%.o?
+# note to self: $^ is all targets, $< is first target
+# you know what? this is probably more readable than whatever solution
+# 20 hours of reading Makefile documenation would yield
+build/%.o: src/%.cpp
+	@echo $@ "<=" $^
+	@$(CXX) $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN) -o $@ -c $<
 
 clean:
 	$(DEL) $(TARGET) $(OBJECTS)
 
-# this will no longer work
 depend:
 	@sed --in-place=.bak '/^# DEPENDENCIES/,$$d' Makefile
 	@$(DEL) sed*
 	@echo $(Q)# DEPENDENCIES$(Q) >> Makefile
 	@$(CXX) -MM $(SRC_FILES) >> Makefile
 
+# last time i used mkdir -p, i wasn't entirely sure it was DOS compatible
+BUILD_DIRS = build build/assembler build/misc build/simulator
 submission:
 	@echo "Creating submission file $(ZIP_NAME) ..."
 	@echo "...Zipping source files:   $(SRC_FILES) ..."
 	@echo "...Zipping header files:   $(H_FILES) ..."
 	@echo "...Zipping resource files: $(REZ_FILES)..."
 	@echo "...Zipping Makefile ..."
-	$(ZIPPER) $(ZIP_NAME) $(SRC_FILES) $(H_FILES) $(REZ_FILES) $(BUILD_DIR) \
+	$(ZIPPER) $(ZIP_NAME) $(SRC_FILES) $(H_FILES) $(REZ_FILES) $(BUILD_DIRS) \
 		Makefile
 	@echo "...$(ZIP_NAME) done!"
 
@@ -92,6 +77,17 @@ debug:
 	g++ $(SRC_FILES) -DDEBUG -fsanitize=address -o $(TARGET)
 
 .PHONY: all clean depend submission debug
-.DEFAULT: all
+.DEFAULT: all first
 
 # DEPENDENCIES
+main.o: src/main.cpp src/assembler/blueprint.h \
+ src/assembler/common_values.h src/assembler/common_values.h \
+ src/assembler/tokenizer.h src/assembler/translation.h \
+ src/misc/cmd_line_opts.h src/misc/file_handling.h
+blueprint.o: src/assembler/blueprint.cpp src/assembler/blueprint.h \
+ src/assembler/common_values.h
+tokenizer.o: src/assembler/tokenizer.cpp src/assembler/tokenizer.h
+translation.o: src/assembler/translation.cpp \
+ src/assembler/common_values.h src/assembler/translation.h
+cmd_line_opts.o: src/misc/cmd_line_opts.cpp src/misc/cmd_line_opts.h
+file_handling.o: src/misc/file_handling.cpp src/misc/file_handling.h

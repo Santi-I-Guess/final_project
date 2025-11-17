@@ -17,7 +17,7 @@ void skip_comment(size_t &buffer_idx, const std::string source_buffer);
 // tokenize_buffer helper function
 void skip_whitespace(size_t &buffer_idx, const std::string source_buffer);
 
-// deque instead of vector to make assembling easier
+// deque instead of deque to make assembling easier
 // creates tokens
 std::deque<std::string> tokenize_buffer(const std::string source_buffer);
 

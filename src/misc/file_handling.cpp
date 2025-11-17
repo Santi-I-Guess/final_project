@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <map>
 #include <string>
-#include <vector>
 
 #include "file_handling.h"
 
@@ -42,7 +41,7 @@ bool write_labels_to_sink(std::map<std::string, int16_t> label_table,
         return true;
 }
 
-bool write_program_to_sink(std::vector<int16_t> program,
+bool write_program_to_sink(std::deque<int16_t> program,
                            std::string header) {
         std::ofstream sink_file("intermediate_program_" + header + ".bin",
                                 std::ios::binary);

@@ -1,7 +1,7 @@
 #ifndef COMMON_VALUES_H
 #define COMMON_VALUES_H 1
 
-#include <vector>
+#include <deque>
 #include <string>
 #include <map>
 
@@ -46,14 +46,14 @@ enum Assembler_Retval {
 class Debug_Info {
 public:
         int                      relevant_idx;
-        std::vector<std::string> relevant_tokens;
+        std::deque<std::string> relevant_tokens;
         Grammar_Retval           grammar_retval;
         Assembler_Retval         assembler_retval;
 };
 
 // instruction argument types
 // leaving mnemonic here so that loop in is_valid_arguments works nicer
-const std::map<std::string, std::vector<Atom_Type>> BLUEPRINTS = {
+const std::map<std::string, std::deque<Atom_Type>> BLUEPRINTS = {
         {"NOP",    {MNEMONIC                                } },
         {"MOV",    {MNEMONIC, REGISTER, SOURCE              } },
         {"ADD",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
