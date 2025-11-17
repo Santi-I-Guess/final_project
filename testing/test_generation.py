@@ -5,7 +5,6 @@
 # - main defined somewhere before EXIT
 # - all labels used are defined
 
-from enum import Enum
 import os      # path.abspathj
 import random
 import sys     # argv
@@ -27,33 +26,41 @@ def get_num_tests() -> int:
     return 0
 
 
-# note to self: python will resolve program_buffer as a global variable if
-# not explicitly defined
-def write_program(sink, program_buffer, message) -> None:
-    # set left align values
+# helper function for write_program
+def is_label(x) -> bool:
+    return x not in instructions.MNEMONICS_LIST
+
+
+# let max lengths of each idx
+def get_alignments(program_buffer) -> list[int]:
     max_sizes = [0, 0, 0, 0]
     for curr_ins in program_buffer:
-        if curr_ins[0] not in instructions.MNEMONICS_LIST:
-            # label
+        if is_label(curr_ins[0]):
             continue
         for idx, atom in enumerate(curr_ins):
             max_sizes[idx] = max(max_sizes[idx], len(atom))
-    # the actual printing
+    return max_sizes
+
+
+# helper function for write_program
+def print_ins(curr_ins, max_sizes, sink):
+    print("    ", end="", file=sink)
+    for idx, token in enumerate(curr_ins):
+        if idx == len(curr_ins) - 1:
+            print(token, end="", file=sink)
+        else:
+            token = token.ljust(max_sizes[idx] + 2, " ")
+            print(token, end=" ", file=sink)
+
+
+def write_program(sink, program_buffer, message) -> None:
+    max_sizes = get_alignments(program_buffer)
     print(message, file=sink)
     for curr_ins in program_buffer:
-        if curr_ins[0] not in instructions.MNEMONICS_LIST:
-            # label definition
+        if is_label(curr_ins[0]):
             print(curr_ins[0], file=sink)
-            continue
-        # actual instruction
-        print("    ", end="", file=sink)
-        for idx, token in enumerate(curr_ins):
-            if idx == len(curr_ins) - 1:
-                print(token, end="", file=sink)
-            else:
-                print(
-                    token.ljust(max_sizes[idx] + 2, " "),
-                    end="", file=sink)
+        else:
+            print_ins(curr_ins, max_sizes, sink)
         print("", file=sink)
 
 
@@ -68,6 +75,7 @@ if __name__ == "__main__":
     for file_idx in range(num_tests):
         program_buffer = instructions.gen_raw_program()
         program_buffer = instructions.insert_label_defs(program_buffer)
+        instructions.quick_check(program_buffer)
         file_name = f"{DUMP_DIR}/gib_valid_example_{file_idx:0>2}.txt"
         with open(file_name, "w") as sink:
             message = "; -- gibberish valid program --"

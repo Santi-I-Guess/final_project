@@ -59,6 +59,9 @@ BLUEPRINTS_MAP: dict[str, list] = {
 MNEMONICS_LIST = list(BLUEPRINTS_MAP.keys())
 
 
+registers = ["RA", "RB", "RC", "RD", "RE", "RF", "RG", "RH", "RSP", "RIP"]
+
+
 def gen_random_i16() -> int:
     # for readability, make small positive values more common than large values
     if random.randint(0, 3) == 0:
@@ -110,14 +113,10 @@ def gen_instruction() -> list[str]:
             rand_i16 = gen_random_i16()
             output_instruction.append(f"${rand_i16}")
         elif curr_type == LITERAL_STR:
-            # print literal backslash, let final_project try to interpret that
             output_instruction.append(f"\"{gen_random_word()}\\n\"")
         elif curr_type == MNEMONIC:
             output_instruction.append(mnemonic)
         elif curr_type == REGISTER:
-            registers = [
-                "RA", "RB", "RC", "RD", "RE", "RF", "RG", "RH", "RSP", "RIP"
-            ]
             output_instruction.append(random.choice(registers))
         elif curr_type == SOURCE:
             # LITERAL_INT, REGISTER, STACK_OFFSET
@@ -183,8 +182,8 @@ def gen_erroneous_mnemonic() -> str:
 
 def gen_erroneous_atom() -> str:
     alphabet: str = "abcdefghijklmnopqrstuvwxyz"
-    word: list[str] = random.sample(alphabet, 2) \
-        + list(str(random.randint(10, 99)))
+    word: list[str] = random.sample(alphabet, 2)
+    word.extend(list(str(random.randint(10, 99))))
     random.shuffle(word)
     suffix_choice = random.randint(0, 6)
     if suffix_choice == 0:
@@ -292,21 +291,15 @@ def quick_check(program_buffer: list[list[str]]) -> None:
 def insert_errors(program_buffer: list[list[str]],
                   error_bits: list[bool]) -> list[list[str]]:
     if error_bits[0]:  # EXPECTED_MNEMONIC
-        quick_check(program_buffer)
         program_buffer = error_expected_mnemonic(program_buffer)
     if error_bits[1]:  # INVALID_ATOM
-        quick_check(program_buffer)
         program_buffer = error_invalid_atom(program_buffer)
     if error_bits[2]:  # MISSING_ARGUMENTS
-        quick_check(program_buffer)
         program_buffer = error_missing_arguments(program_buffer)
     if error_bits[3]:  # MISSING_EXIT
-        quick_check(program_buffer)
         program_buffer = error_missing_exit(program_buffer)
     if error_bits[4]:  # MISSING_MAIN
-        quick_check(program_buffer)
         program_buffer = error_missing_main(program_buffer)
     if error_bits[5]:  # UNKNOWN_LABEL
-        quick_check(program_buffer)
         program_buffer = error_unknown_label(program_buffer)
     return program_buffer
