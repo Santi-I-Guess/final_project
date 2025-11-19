@@ -6,10 +6,6 @@
 
 #include "tokenizer.h"
 
-// made newlines cause early termination of tokenize_buffer, which allows
-//      for reliable "Missing arguments" for SPRINT without needing another
-//      retval enum for tokenization
-
 size_t get_token_len(size_t i, std::string source_buffer) {
         size_t token_len = 1, buff_len = source_buffer.length();
         bool is_quote_token = source_buffer[i] == '\"';
@@ -44,7 +40,6 @@ size_t get_token_len(size_t i, std::string source_buffer) {
 }
 
 bool is_identifier_char(const char i) {
-        // equivalent regex pattern: [$%|a-zA-Z0-9_]
         if (i == '$' || i == '%' || i == ':' || i == '_' || i == '-')
                 return true;
         if (isalnum(i))

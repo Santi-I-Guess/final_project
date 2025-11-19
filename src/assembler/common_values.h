@@ -5,7 +5,9 @@
 #include <string>
 #include <map>
 
-// instruction argument types
+/**
+ * @brief enum for atom (a.k.a. argument) type
+ */
 enum Atom_Type {
         LABEL        = 1,
         LITERAL_INT  = 1 << 1,
@@ -22,7 +24,9 @@ enum Atom_Type {
 // can't have the same name used in two different enums, so that's why
 // there are almost exactly the same names
 
-// return value for blueprint functions
+/**
+ * @brief enum for errors in blueprint functions
+ */
 enum Grammar_Retval {
         EXPECTED_MNEMONIC,
         ACCEPTABLE,
@@ -33,7 +37,11 @@ enum Grammar_Retval {
         UNKNOWN_LABEL,
 };
 
-// return value for translation functions
+/**
+ * @brief enum for errors in translation functions
+ * @details this is deprecated, and basically just duplicates of
+ * Grammar_Retval, but im keeping in here for now
+ */
 enum Assembler_Retval {
         ACCEPTABLE_2,
         EXPECTED_MNEMONIC_2,
@@ -42,55 +50,74 @@ enum Assembler_Retval {
         MISSING_MAIN_2,
 };
 
-// to pass debug info through syntax checking functions
-// don't really think I need private members for this class
+/**
+ * @brief container struct for debugging / error catching in blueprint
+ * and translation functions
+ */
 struct Debug_Info {
-        int                     relevant_idx;
-        std::deque<std::string> relevant_tokens;
-        Grammar_Retval          grammar_retval;
-        Assembler_Retval        assembler_retval;
+        int                     relevant_idx;     ///< any relevant idx
+        std::deque<std::string> relevant_tokens;  ///< any relevant tokens
+        Grammar_Retval          grammar_retval;   ///< blueprint error
+        Assembler_Retval        assembler_retval; ///< translation error
 };
 
-// instruction argument types
-// leaving mnemonic here so that loop in is_valid_arguments works nicer
+/**
+ * @brief container struct for pass info through translation tokens
+ * @details as of Tue 18.Nov.2025, this has no applications yet
+ */
+struct Program_Info {
+        std::deque<std::string> tokens;             ///< tokens from user program
+        std::map<std::string, int16_t> label_table; ///< labels from user program
+};
+
+/**
+ * @brief hashmap that defines arguments of instructions in assembly language
+ * @details even though every instruction needs a mnemonic, it's left in here
+ * so that the inner loop of generate_program doesn't need to have extra
+ * logic for the first argument (i == 0)
+ */
 const std::map<std::string, std::deque<Atom_Type>> BLUEPRINTS = {
-        {"NOP",    {MNEMONIC                                } },
-        {"MOV",    {MNEMONIC, REGISTER, SOURCE              } },
-        {"ADD",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"SUB",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"MUL",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"DIV",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"AND",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"OR",     {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"XOR",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"LSH",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"RSH",    {MNEMONIC, REGISTER, SOURCE, SOURCE      } },
-        {"CMP",    {MNEMONIC, SOURCE,   SOURCE              } },
-        {"JEQ",    {MNEMONIC, LABEL                         } },
-        {"JNE",    {MNEMONIC, LABEL                         } },
-        {"JGE",    {MNEMONIC, LABEL                         } },
-        {"JGR",    {MNEMONIC, LABEL                         } },
-        {"JLE",    {MNEMONIC, LABEL                         } },
-        {"JLS",    {MNEMONIC, LABEL                         } },
-        {"CALL",   {MNEMONIC, LABEL                         } },
-        {"RET",    {MNEMONIC                                } },
-        {"PUSH",   {MNEMONIC, SOURCE                        } },
-        {"POP",    {MNEMONIC, REGISTER                      } },
-        {"WRITE",  {MNEMONIC, SOURCE,   LITERAL_INT         } },
-        {"READ",   {MNEMONIC, REGISTER, LITERAL_INT         } },
-        {"PRINT",  {MNEMONIC, SOURCE                        } },
-        {"SPRINT", {MNEMONIC, LITERAL_STR                   } },
-        {"EXIT",   {MNEMONIC                                } },
+        {"NOP",    {MNEMONIC                          } },
+        {"MOV",    {MNEMONIC, REGISTER, SOURCE        } },
+        {"ADD",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"SUB",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"MUL",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"DIV",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"AND",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"OR",     {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"XOR",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"LSH",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"RSH",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
+        {"CMP",    {MNEMONIC, SOURCE,   SOURCE        } },
+        {"JEQ",    {MNEMONIC, LABEL                   } },
+        {"JNE",    {MNEMONIC, LABEL                   } },
+        {"JGE",    {MNEMONIC, LABEL                   } },
+        {"JGR",    {MNEMONIC, LABEL                   } },
+        {"JLE",    {MNEMONIC, LABEL                   } },
+        {"JLS",    {MNEMONIC, LABEL                   } },
+        {"CALL",   {MNEMONIC, LABEL                   } },
+        {"RET",    {MNEMONIC                          } },
+        {"PUSH",   {MNEMONIC, SOURCE                  } },
+        {"POP",    {MNEMONIC, REGISTER                } },
+        {"WRITE",  {MNEMONIC, SOURCE,   LITERAL_INT   } },
+        {"READ",   {MNEMONIC, REGISTER, LITERAL_INT   } },
+        {"PRINT",  {MNEMONIC, SOURCE                  } },
+        {"SPRINT", {MNEMONIC, LITERAL_STR             } },
+        {"EXIT",   {MNEMONIC                          } },
 };
 
-// valid register symbols
+/**
+ * @brief hashmap for valid callable registers in assembly language
+ */
 const std::map<std::string, int16_t> REGISTER_TABLE = {
         {"RA",  0}, {"RB",  1}, {"RC", 2}, {"RD", 3},
         {"RE",  4}, {"RF",  5}, {"RG", 6}, {"RH", 7},
         {"RSP", 8}, {"RIP", 9}
 };
 
-// opcode for each instruction mnemonic
+/**
+ * @brief hashmap for valid opcodes for each mnemoinc in assembly language
+ */
 const std::map<std::string, int16_t> OPCODE_TABLE = {
         {"NOP",    0}, {"MOV",     1}, {"ADD",    2}, {"SUB",   3},
         {"MUL",    4}, {"DIV",     5}, {"AND",    6}, {"OR",    7},
