@@ -1,10 +1,28 @@
 #include <deque>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <map>
 #include <string>
+#include <cstdlib>
 
 #include "file_handling.h"
+
+void generate_intermediates(std::string file_header,
+                            std::deque<std::string> tokens,
+                            std::map<std::string, int16_t> label_table) {
+        bool res_temp;
+        res_temp = write_tokens_to_sink(tokens, file_header);
+        if (!res_temp) {
+                std::cerr << "Failed to open token sink file\n";
+                std::exit(1);
+        }
+        res_temp = write_labels_to_sink(label_table, file_header);
+        if (!res_temp) {
+                std::cerr << "Failed to open label sink file\n";
+                std::exit(1);
+        }
+}
 
 std::string read_file_to_buffer(std::ifstream &source_file) {
         source_file.seekg(0, std::ios_base::end);
@@ -43,7 +61,7 @@ bool write_labels_to_sink(std::map<std::string, int16_t> label_table,
 
 bool write_program_to_sink(std::deque<int16_t> program,
                            std::string header) {
-        std::ofstream sink_file("intermediate_program_" + header + ".bin",
+        std::ofstream sink_file("program_" + header + ".bin",
                                 std::ios::binary);
         if (sink_file.fail()) {
                 return false;

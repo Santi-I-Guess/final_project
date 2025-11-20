@@ -69,7 +69,6 @@ def write_program(sink, program_buffer, message) -> None:
             print(f"; ins #{ins_num}", file=sink)
             ins_num += 1
 
-
 if __name__ == "__main__":
     num_tests = get_num_tests()
     if num_tests == 0:

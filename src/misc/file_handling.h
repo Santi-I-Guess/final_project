@@ -6,6 +6,14 @@
 #include <string>
 
 /**
+ * @brief generates token file and labels file
+ * @details wrapper function of write_tokens_to_sink and write_labels_to_sink
+ */
+void generate_intermediates(std::string file_header,
+                            std::deque<std::string> tokens,
+                            std::map<std::string, int16_t> label_table);
+
+/**
  * @brief reads ascii source file into
  */
 std::string read_file_to_buffer(std::ifstream &source_file);

@@ -97,5 +97,6 @@ std::deque<std::string> tokenize_buffer(const std::string source_buffer) {
                 }
                 buff_idx++;
         }
+        tokens.shrink_to_fit();
         return tokens;
 }

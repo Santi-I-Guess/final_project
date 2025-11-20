@@ -13,6 +13,8 @@
 #include <random>
 #include <string>
 
+#include "auxiliary.h"
+
 #include "assembler/blueprint.h"
 #include "assembler/common_values.h"
 #include "assembler/tokenizer.h"
@@ -29,14 +31,13 @@ int main(int argc, char **argv) {
         if (!valid_cmd_arg_combo)
                 return 0;
 
-        // produce intermediate file header, if needed
-        // makes doing multiple tests in a row much easier
+        // produce intermediate file header
+        // makes running multiple tests in a row unlikely to overwrite data
         std::random_device rd;
         std::mt19937 mt(rd());
         std::uniform_int_distribution rand_letter(0, 25);
         std::string file_header = "";
         for (int i = 0; i < 10; ++i) {
-                // changes of wrongful truncation are 1 : 26^10
                 char curr_letter;
                 int letter_idx = rand_letter(mt);
                 curr_letter = (char)letter_idx + 'a';
@@ -56,97 +57,32 @@ int main(int argc, char **argv) {
                         std::cerr << "Failed to open input file\n";
                         return 1;
                 }
+
+                // Step 1: tokenize and define labels
+                // label_table also removes label definitions from tokens
                 std::string source_buffer = read_file_to_buffer(source_file);
                 std::deque<std::string> tokens = tokenize_buffer(source_buffer);
-                tokens.shrink_to_fit();
-                if (life_opts.intermediate_files) {
-                        bool res_temp = write_tokens_to_sink(tokens, file_header);
-                        if (!res_temp) {
-                                std::cerr << "Failed to open token sink file\n";
-                                return 1;
-                        }
-                }
-                // also removes label definitions from tokens
                 std::map<std::string, int16_t> label_table = define_labels(tokens);
-                if (life_opts.intermediate_files) {
-                        bool res_temp = write_labels_to_sink(label_table, file_header);
-                        if (!res_temp) {
-                                std::cerr << "Failed to open label sink file\n";
-                                return 1;
-                        }
-                }
-                Debug_Info res = is_valid_arguments(tokens, label_table);
-                switch (res.grammar_retval) {
-                case ACCEPTABLE:
-                        break;
-                case EXPECTED_MNEMONIC:
-                        std::cout << "--- Grammar Error ---\n";
-                        std::cout << "Expected mnemonic\n";
-                        std::cout << "Instruction #" << res.relevant_idx << "\n";
-                        std::cout << "Actual Symbol: " << res.relevant_tokens.at(0) << "\n";
-                        return 0;
-                case INVALID_ATOM:
-                        std::cout << "--- Grammar Error ---\n";
-                        std::cout << "Invalid atom\n";
-                        std::cout << "Instruction #" << res.relevant_idx << "\n";
-                        std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
-                        std::cout << "Invalid symbol: " << res.relevant_tokens.at(1) << "\n";
-                        return 0;
-                case MISSING_ARGUMENTS:
-                        std::cout << "--- Grammar Error ---\n";
-                        std::cout << "Missing arguments\n";
-                        std::cout << "Instruction #" << res.relevant_idx << "\n";
-                        std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
-                        return 0;
-                case MISSING_EXIT:
-                        std::cout << "--- Grammar Error ---\n";
-                        std::cout << "Missing EXIT instruction\n";
-                        return 0;
-                case MISSING_MAIN:
-                        std::cout << "--- Grammar Error ---\n";
-                        std::cout << "Missing MAIN label\n";
-                        return 0;
-                case UNKNOWN_LABEL:
-                        std::cout << "--- Grammar Error ---\n";
-                        std::cout << "Attempted to call unknown label\n";
-                        std::cout << "Instruction #" << res.relevant_idx << "\n";
-                        std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
-                        std::cout << "Invalid symbol: " << res.relevant_tokens.at(1) << "\n";
-                        return 0;
-                }
+                if (life_opts.intermediate_files)
+                        generate_intermediates(file_header, tokens, label_table);
 
-                res = generate_program(final_program, tokens, label_table);
-                switch (res.assembler_retval) {
-                case ACCEPTABLE_2:
-                        break;
-                case MISSING_MAIN_2:
-                        std::cout << "--- Assembler Error ---\n";
-                        std::cout << "Main label was never defined\n";
-                        return 0;
-                case UNKNOWN_LABEL_2:
-                        std::cout << "--- Assembler Error ---\n";
-                        std::cout << "Label is undefined\n";
-                        std::cout << "Token #" << res.relevant_idx << "\n";
-                        std::cout << "Invalid instruction: ";
-                        std::cout << res.relevant_tokens.at(0) << " ";
-                        std::cout << res.relevant_tokens.at(1) << "\n";
-                        return 0;
-                case EXPECTED_MNEMONIC_2:
-                        std::cout << "--- Assembler Error ---\n";
-                        std::cout << "Mnemonic is undefined\n";
-                        std::cout << "Instruction #" << res.relevant_idx << "\n";
-                        std::cout << "Invalid mnemonic: " << res.relevant_tokens.at(0) << "\n";
-                        return 0;
-                case MISSING_ARGUMENTS_2:
-                        // is intentionally duplicate, will remove the previous
-                        // MISSING_ARGUMENTS later
-                        std::cout << "--- Assembler Error ---\n";
-                        std::cout << "Missing arguments\n";
-                        std::cout << "Instruction #" << res.relevant_idx << "\n";
-                        std::cout << "Mnemonic: " << res.relevant_tokens.at(0) << "\n";
-                        return 0;
-                }
+                // Step 2: grammar checking for tokenized program
+                Debug_Info res;
+                res = grammar_check(tokens, label_table);
+                handle_grammar_check_res(res);
 
+                // Step 3: generate program
+                // str_idx_offsets should be empty
+                Program_Info program_info = {};
+                program_info.tokens = tokens;
+                program_info.label_table = label_table;
+                res = generate_program(final_program, program_info);
+                handle_generation_res(res);
+
+                /*
+                // Removed while reworking ABI
+
+                // note: program does not fall under intermediate files
                 if (life_opts.intermediate_files) {
                         bool res_temp = write_program_to_sink(final_program, file_header);
                         if (!res_temp) {
@@ -154,12 +90,16 @@ int main(int argc, char **argv) {
                                 return 1;
                         }
                 }
+                */
         }
 
-
         if (life_opts.compile_only) {
-                // write_program_data(cpu_handle, sink_path);
-                // return 0;
+                bool res_temp;
+                res_temp = write_program_to_sink(final_program, file_header);
+                if (!res_temp) {
+                        std::cerr << "Failed to open token sink file\n";
+                        return 1;
+                }
         }
 
         // CPU_Handle cpu_handle;

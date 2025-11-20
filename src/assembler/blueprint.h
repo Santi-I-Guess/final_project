@@ -22,7 +22,7 @@ bool is_valid_i16(std::string token);
 
 /**
  * @brief checks if a token matches the expected atom type
- * @details helper function of is_valid_arguments
+ * @details helper function of grammar_check
  */
 bool is_valid_atom(Atom_Type atom_type, std::string token);
 
@@ -31,5 +31,5 @@ bool is_valid_atom(Atom_Type atom_type, std::string token);
  * @details checks for unknown mnemonics, invalid atoms, missing arguments,
  * missing EXIT program, missing main label, or calling an undefined label
  */
-Debug_Info is_valid_arguments(std::deque<std::string> tokens,
+Debug_Info grammar_check(std::deque<std::string> tokens,
                               std::map<std::string, int16_t> label_table);

@@ -84,7 +84,7 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
 }
 
 
-Debug_Info is_valid_arguments(std::deque<std::string> tokens,
+Debug_Info grammar_check(std::deque<std::string> tokens,
                               std::map<std::string, int16_t> label_table) {
         // std::deque::pop_front makes std::deque::erase irrelevant
         // (saves on copies)

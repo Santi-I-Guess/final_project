@@ -45,6 +45,7 @@ enum Grammar_Retval {
 enum Assembler_Retval {
         ACCEPTABLE_2,
         EXPECTED_MNEMONIC_2,
+        INVALID_ATOM_2,
         UNKNOWN_LABEL_2,
         MISSING_ARGUMENTS_2,
         MISSING_MAIN_2,
@@ -68,6 +69,7 @@ struct Debug_Info {
 struct Program_Info {
         std::deque<std::string> tokens;             ///< tokens from user program
         std::map<std::string, int16_t> label_table; ///< labels from user program
+        std::map<int16_t, int16_t> str_idx_offsets; ///< refer to abi.md
 };
 
 /**
@@ -116,23 +118,6 @@ const std::map<std::string, int16_t> REGISTER_TABLE = {
         {"RA",  0}, {"RB",  1}, {"RC",    2}, {"RD", 3},
         {"RE",  4}, {"RF",  5}, {"RG",    6}, {"RH", 7},
         {"RSP", 8}, {"RIP", 9}, {"CMP0", 10}, {"CMP1", 11}
-};
-
-/**
- * @brief hashmap for valid opcodes for each mnemoinc in assembly language
- */
-// new: not, inc, dec
-const std::map<std::string, int16_t> OPCODE_TABLE = {
-        {"NOP",    0}, {"MOV",     1}, {"INC",   2},
-        {"DEC",    3}, {"ADD",     4}, {"SUB",   5},
-        {"MUL",    6}, {"DIV",     7}, {"AND",   8},
-        {"OR",     9}, {"NOT",    10}, {"XOR",  11},
-        {"LSH",   12}, {"RSH",    13}, {"CMP",  14},
-        {"JEQ",   15}, {"JNE",    16}, {"JGE",  17},
-        {"JGR",   18}, {"JLE",    19}, {"JLS",  20},
-        {"CALL",  21}, {"RET",    22}, {"PUSH", 23},
-        {"POP",   24}, {"WRITE",  25}, {"READ", 26},
-        {"PRINT", 27}, {"SPRINT", 28}, {"EXIT", 29},
 };
 
 #endif
