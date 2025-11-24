@@ -3,11 +3,16 @@
 #include <string>
 #include <sstream>
 
-#include "common_values.h"
+#include "../common_values.h"
 #include "translation.h"
 
-Debug_Info generate_program(std::deque<int16_t> &program,
-                            Program_Info program_info) {
+// TODO: reduce max indentation to 3 levels: refactor step 3 of generate_program
+// TODO: refactor instances of 80+ chars
+
+Debug_Info generate_program(
+        std::deque<int16_t> &program,
+        Program_Info program_info
+) {
         Debug_Info context;
         context.assembler_retval = ACCEPTABLE_2;
         std::deque<std::string> &tokens = program_info.tokens;
@@ -29,6 +34,12 @@ Debug_Info generate_program(std::deque<int16_t> &program,
                 entry_offset += (int16_t)(string_output.size());
                 num_strings++;
         }
+
+        // ensure 0 element buffer between entry addr and first opcode
+        if (num_strings == 0)
+                program.push_back((int16_t)(0x0));
+        // marks end of strings
+        program.push_back((int16_t)(0xffff));
 
         // Step 2: add entry offset and magic number to beginning of program
         program.push_front(label_table.at("main") + entry_offset);
@@ -144,7 +155,7 @@ int16_t translate_token(std::string token, Atom_Type atom_type,
                 token = token.substr(1, token.length() - 1);
                 aux_stream << token;
                 aux_stream >> aux_int;
-                aux_int |= (int16_t)(1 << 30); // bitmask
+                aux_int |= (int16_t)(1 << 14); // bitmask
                 return aux_int;
         case LITERAL_STR: // the idx, not the string itself
                 return str_idx_offsets.at(num_seen_strs);
@@ -163,7 +174,7 @@ int16_t translate_token(std::string token, Atom_Type atom_type,
                 token = token.substr(1, token.length() - 1);
                 aux_stream << token;
                 aux_stream >> aux_int;
-                aux_int |= (int16_t)(1 << 29); // bitmask
+                aux_int |= (int16_t)(1 << 13); // bitmask
                 return aux_int;
         }
         return 0; // impossible

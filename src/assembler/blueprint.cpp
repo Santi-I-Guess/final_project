@@ -6,9 +6,9 @@
 #include <sstream>
 
 #include "blueprint.h"
-#include "common_values.h"
+#include "../common_values.h"
 
-std::map<std::string, int16_t> define_labels(std::deque<std::string> &tokens) {
+std::map<std::string, int16_t> create_label_map(std::deque<std::string> &tokens) {
         std::map<std::string, int16_t> symbols = {};
         std::deque<std::string> filtered_tokens = {}; // remove label definitions
         size_t program_addr = 0;
@@ -33,19 +33,6 @@ std::map<std::string, int16_t> define_labels(std::deque<std::string> &tokens) {
         return symbols;
 }
 
-bool is_valid_i16(std::string token) {
-        std::stringstream the_stream(token);
-        int32_t value = 0;
-        the_stream >> token;
-        if (the_stream.fail())
-                return false;
-        if (value > (int32_t)INT16_MAX)
-                return false;
-        if (value < (int32_t)INT16_MIN)
-                return false;
-        return true;
-}
-
 bool is_valid_atom(Atom_Type atom_type, std::string token) {
         bool first, second;
         switch (atom_type) {
@@ -55,7 +42,7 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
         case LITERAL_INT:
                 if (token.front() != '$')
                         return false;
-                token = token.substr(1, token.length()-1);
+                token = token.substr(1, token.length() - 1);
                 return is_valid_i16(token);
         case LITERAL_STR:
                 first = token.front() == token.back();
@@ -77,11 +64,25 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
         case STACK_OFFSET:
                 if (token.front() != '%')
                         return false;
-                token = token.substr(1, token.length()-1);
+                token = token.substr(1, token.length() - 1);
                 return is_valid_i16(token);
         }
         return true;
 }
+
+bool is_valid_i16(std::string token) {
+        std::stringstream the_stream(token);
+        int32_t value = 0;
+        the_stream >> token;
+        if (the_stream.fail())
+                return false;
+        if (value > (int32_t)INT16_MAX)
+                return false;
+        if (value < (int32_t)INT16_MIN)
+                return false;
+        return true;
+}
+
 
 
 Debug_Info grammar_check(std::deque<std::string> tokens,
@@ -111,6 +112,7 @@ Debug_Info grammar_check(std::deque<std::string> tokens,
         // map has std::map::find, which makes checking easy
         int instruction_idx = 0;
         while (!tokens.empty()) {
+                // check front token is a known mnemonic
                 if (BLUEPRINTS.find(tokens.front()) == BLUEPRINTS.end()) {
                         context.relevant_idx = instruction_idx;
                         context.relevant_tokens = {tokens.front()};
@@ -119,13 +121,15 @@ Debug_Info grammar_check(std::deque<std::string> tokens,
                 }
                 std::deque<Atom_Type> curr_blueprint;
                 curr_blueprint = BLUEPRINTS.at(tokens.front());
-                curr_blueprint.shrink_to_fit(); /* prevent werid uninit data */
+                curr_blueprint.shrink_to_fit();
+                // check there are enough tokens to warrent argument check
                 if (tokens.size() < curr_blueprint.size()) {
                         context.relevant_idx = instruction_idx;
                         context.relevant_tokens = {tokens.front()};
                         context.grammar_retval = MISSING_ARGUMENTS;
                         return context;
                 }
+                // check each argument type
                 for (size_t i = 0; i < curr_blueprint.size(); ++i) {
                         if (!is_valid_atom(curr_blueprint.at(i), tokens.at(i))) {
                                 context.relevant_idx = instruction_idx;
@@ -134,8 +138,7 @@ Debug_Info grammar_check(std::deque<std::string> tokens,
                                 return context;
                         }
                         bool lbl_chk_1 = curr_blueprint.at(i) == LABEL;
-                        bool lbl_chk_2 = label_table.find(tokens.at(i))
-                                == label_table.end();
+                        bool lbl_chk_2 = label_table.find(tokens.at(i)) == label_table.end();
                         if (lbl_chk_1 && lbl_chk_2) {
                                 context.relevant_idx = instruction_idx;
                                 context.relevant_tokens = {tokens.at(0), tokens.at(i)};

@@ -111,6 +111,23 @@ const std::map<std::string, std::deque<Atom_Type>> BLUEPRINTS = {
         {"EXIT",   {MNEMONIC                          } },
 };
 
+
+/**
+ * @brief hashmap for valid opcodes for each mnemoinc in assembly language
+ */
+const std::map<std::string, int16_t> OPCODE_TABLE = {
+        {"NOP",    0}, {"MOV",     1}, {"INC",   2},
+        {"DEC",    3}, {"ADD",     4}, {"SUB",   5},
+        {"MUL",    6}, {"DIV",     7}, {"AND",   8},
+        {"OR",     9}, {"NOT",    10}, {"XOR",  11},
+        {"LSH",   12}, {"RSH",    13}, {"CMP",  14},
+        {"JEQ",   15}, {"JNE",    16}, {"JGE",  17},
+        {"JGR",   18}, {"JLE",    19}, {"JLS",  20},
+        {"CALL",  21}, {"RET",    22}, {"PUSH", 23},
+        {"POP",   24}, {"WRITE",  25}, {"READ", 26},
+        {"PRINT", 27}, {"SPRINT", 28}, {"EXIT", 29},
+};
+
 /**
  * @brief hashmap for valid callable registers in assembly language
  */

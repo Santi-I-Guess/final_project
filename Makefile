@@ -9,7 +9,6 @@ USERNAME  = santiago_sagastegui
 
 # https://www.gnu.org/software/make/manual/html_node/File-Name-Functions.html
 # this is why you read documentation, kids
-OBJECTS = $(patsubst %.cpp, build/%.o, $(notdir $(SRC_FILES)))
 
 CXX = g++
 # remove fsanitize later
@@ -20,13 +19,14 @@ CPPVERSION = -std=c++17
 
 ARCHIVE_EXTENSION = zip
 
+MKDIR = mkdir build
 ifeq ($(shell echo "Windows"), "Windows")
 	TARGET = $(PROJECT).exe
 	DEL = del
 	ZIPPER = tar -a -c -f
 	ZIP_NAME = $(PROJECT)_$(USERNAME).$(ARCHIVE_EXTENSION)
 	Q =
-	MKDIR = New-Item -Name "build" -ItemType "Directory" -Force
+	OBJECTS = $(patsubst %.cpp, build\%.o, $(notdir $(SRC_FILES)))
 else
 	TARGET = $(PROJECT)
 	DEL = rm -f
@@ -36,7 +36,7 @@ else
 		ARCHIVE_EXTENSION = tar.gz
 	endif
 	ZIP_NAME = $(PROJECT)_$(USERNAME).$(ARCHIVE_EXTENSION)
-	MKDIR = mkdir -p build
+	OBJECTS = $(patsubst %.cpp, build/%.o, $(notdir $(SRC_FILES)))
 endif
 
 BUILD_DIR = build
@@ -59,10 +59,9 @@ depend:
 	@sed --in-place=.bak '/^# DEPENDENCIES/,$$d' Makefile
 	@$(DEL) sed*
 	@echo $(Q)# DEPENDENCIES$(Q) >> Makefile
-	@$(CXX) -MM $(SRC_FILES) >> Makefile
+	@$(CXX) -MM $(SRC_FILES) | sed "s/\([a-z_]*.o:\)/build\/\1/g" >> Makefile
 
-# last time i used mkdir -p, i wasn't entirely sure it was DOS compatible
-submission:
+submission: | $(BUILD_DIR)
 	@echo "Creating submission file $(ZIP_NAME) ..."
 	@echo "...Zipping source files:   $(SRC_FILES) ..."
 	@echo "...Zipping header files:   $(H_FILES) ..."
@@ -87,7 +86,10 @@ build/translation.o: src/assembler/translation.cpp \
  src/assembler/common_values.h src/assembler/translation.h
 build/cmd_line_opts.o: src/misc/cmd_line_opts.cpp src/misc/cmd_line_opts.h
 build/file_handling.o: src/misc/file_handling.cpp src/misc/file_handling.h
-build/main.o: src/main.cpp src/assembler/blueprint.h \
- src/assembler/common_values.h src/assembler/common_values.h \
+build/auxiliary.o: src/auxiliary.cpp src/auxiliary.h \
+ src/assembler/common_values.h
+build/main.o: src/main.cpp src/auxiliary.h src/assembler/common_values.h \
+ src/assembler/blueprint.h src/assembler/common_values.h \
  src/assembler/tokenizer.h src/assembler/translation.h \
- src/misc/cmd_line_opts.h src/misc/file_handling.h
+ src/misc/cmd_line_opts.h src/misc/file_handling.h \
+ src/simulator/cpu_handle.h

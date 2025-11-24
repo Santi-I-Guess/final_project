@@ -70,9 +70,10 @@ registers = ["RA", "RB", "RC", "RD",
 def gen_random_i16() -> int:
     # for readability, make small positive values more common than large values
     if random.randint(0, 3) == 0:
-        return math.ceil(random.triangular(-2**15, 2**15))
+        return math.ceil(random.triangular(-32768, 32767))
     else:
-        return math.ceil(random.triangular(-2**5, 2**6))
+        # human sized number
+        return math.ceil(random.triangular(-32, 64))
 
 
 def gen_random_word() -> str:

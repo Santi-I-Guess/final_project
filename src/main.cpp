@@ -14,13 +14,13 @@
 #include <string>
 
 #include "auxiliary.h"
-
+#include "common_values.h"
 #include "assembler/blueprint.h"
-#include "assembler/common_values.h"
 #include "assembler/tokenizer.h"
 #include "assembler/translation.h"
 #include "misc/cmd_line_opts.h"
 #include "misc/file_handling.h"
+#include "simulator/cpu_handle.h"
 
 // every subdirectory of src is isolated in dependencies and function
 // make tests eventually
@@ -51,14 +51,6 @@ int main(int argc, char **argv) {
         std::string source_path = argv[life_opts.input_file_idx];
         if (life_opts.is_binary_input) {
                 populate_program_from_binary(final_program, source_path);
-                // verify correct ordering of bytes
-                /*
-                for (int16_t i : final_program) {
-                        int16_t lower = i & 255;
-                        int16_t upper = i >> 8;
-                        std::cout << (char)lower << (char)upper;
-                }
-                */
         } else {
                 std::ifstream source_file(source_path);
                 if (source_file.fail()) {
@@ -69,8 +61,8 @@ int main(int argc, char **argv) {
                 // Step 1: tokenize and define labels
                 // label_table also removes label definitions from tokens
                 std::string source_buffer = read_file_to_buffer(source_file);
-                std::deque<std::string> tokens = tokenize_buffer(source_buffer);
-                std::map<std::string, int16_t> label_table = define_labels(tokens);
+                std::deque<std::string> tokens = create_tokens(source_buffer);
+                std::map<std::string, int16_t> label_table = create_label_map(tokens);
                 if (life_opts.intermediate_files)
                         generate_intermediates(file_header, tokens, label_table);
 
@@ -86,19 +78,6 @@ int main(int argc, char **argv) {
                 program_info.label_table = label_table;
                 res = generate_program(final_program, program_info);
                 handle_generation_res(res);
-
-                /*
-                // Removed while reworking ABI
-
-                // note: program does not fall under intermediate files
-                if (life_opts.intermediate_files) {
-                        bool res_temp = write_program_to_sink(final_program, file_header);
-                        if (!res_temp) {
-                                std::cerr << "Failed to open program sink file\n";
-                                return 1;
-                        }
-                }
-                */
         }
 
         if (life_opts.compile_only) {
@@ -110,10 +89,12 @@ int main(int argc, char **argv) {
                 }
         }
 
-        // CPU_Handle cpu_handle;
+        // note to self: can i create something like gdb?? PALdb? pdb?
 
-        // run the program
-        // run_program(cpu_handle, life_opts.print_step);
+        CPU_Handle cpu_handle;
+        cpu_handle.load_program(final_program);
+        cpu_handle.interpret_program();
+//      cpu_handle.run_program();
 
         return 0;
 }

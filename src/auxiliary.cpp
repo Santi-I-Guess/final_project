@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "auxiliary.h"
-#include "assembler/common_values.h"
+#include "common_values.h"
 
 // refactoring functions for main.cpp, therefore i'll allow includes from
 // other modules here

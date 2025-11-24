@@ -1,7 +1,7 @@
 #ifndef AUXILIARY_H
 #define AUXILIARY_H 1
 
-#include "assembler/common_values.h"
+#include "common_values.h"
 
 /**
  * @brief prints info and exits if assembler failed

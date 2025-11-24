@@ -1,10 +1,9 @@
 # to ignore executable files
-*
-!*.*
 build/*
 testing/[^.]*
 docs/[^.]*
 !docs/Doxyfile
+final_project
 *.bak
 *.bin
 *.ods
