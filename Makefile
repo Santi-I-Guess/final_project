@@ -12,7 +12,7 @@ USERNAME  = santiago_sagastegui
 
 CXX = g++
 # remove fsanitize later
-CXXFLAGS_DEBUG = -g -fsanitize=address
+CXXFLAGS_DEBUG = -g
 CXXFLAGS_WARN  = -Wall -Werror -Wextra -Wconversion -Wdouble-promotion \
 				 -Wunreachable-code -Wshadow -Wpedantic
 CPPVERSION = -std=c++17
@@ -42,12 +42,20 @@ endif
 BUILD_DIR = build
 
 # order only prerequisite: don't build again, but ensure they exist
-all: | $(BUILD_DIR)
-	@make -C src
-	@make -C src/assembler
-	@make -C src/misc
-	@make -C src/simulator
-	$(CXX) -o $(TARGET) $(OBJECTS)
+
+all: first second
+first: |$(BUILD_DIR)
+second: $(TARGET)
+
+# VPATH variable specifies list of directories to search for prerequisites
+VPATH = $(SRC_DIRS)
+build/%.o: %.cpp
+	@echo "building $(notdir $<)"
+	@$(CXX) -o $@ -c $< $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN)
+
+$(TARGET): $(OBJECTS)
+	@echo "building $@"
+	@$(CXX) -o $@ $^
 
 $(BUILD_DIR):
 	$(MKDIR)
@@ -80,16 +88,17 @@ debug:
 # L6A: -MM has no option to prefix a build dir
 # DEPENDENCIES
 build/blueprint.o: src/assembler/blueprint.cpp src/assembler/blueprint.h \
- src/assembler/common_values.h
+ src/assembler/../common_values.h
 build/tokenizer.o: src/assembler/tokenizer.cpp src/assembler/tokenizer.h
 build/translation.o: src/assembler/translation.cpp \
- src/assembler/common_values.h src/assembler/translation.h
+ src/assembler/../common_values.h src/assembler/translation.h
 build/cmd_line_opts.o: src/misc/cmd_line_opts.cpp src/misc/cmd_line_opts.h
 build/file_handling.o: src/misc/file_handling.cpp src/misc/file_handling.h
-build/auxiliary.o: src/auxiliary.cpp src/auxiliary.h \
- src/assembler/common_values.h
-build/main.o: src/main.cpp src/auxiliary.h src/assembler/common_values.h \
- src/assembler/blueprint.h src/assembler/common_values.h \
+build/cpu_handle.o: src/simulator/cpu_handle.cpp \
+ src/simulator/../common_values.h src/simulator/cpu_handle.h
+build/auxiliary.o: src/auxiliary.cpp src/auxiliary.h src/common_values.h
+build/main.o: src/main.cpp src/auxiliary.h src/common_values.h \
+ src/assembler/blueprint.h src/assembler/../common_values.h \
  src/assembler/tokenizer.h src/assembler/translation.h \
  src/misc/cmd_line_opts.h src/misc/file_handling.h \
  src/simulator/cpu_handle.h
