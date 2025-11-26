@@ -1,55 +1,66 @@
 # Two cars in every pot and a chicken in every garage.
 
-PROJECT = final_project
-SRC_DIRS  = src/assembler src/misc src/simulator src
-SRC_FILES = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.cpp))
-H_FILES   = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.h))
-REZ_FILES = resources/pseudo_assembly_assembler.png
-USERNAME  = santiago_sagastegui
-
-# https://www.gnu.org/software/make/manual/html_node/File-Name-Functions.html
-# this is why you read documentation, kids
-
 CXX = g++
-# remove fsanitize later
 CXXFLAGS_DEBUG = -g
 CXXFLAGS_WARN  = -Wall -Werror -Wextra -Wconversion -Wdouble-promotion \
-				 -Wunreachable-code -Wshadow -Wpedantic
+				 -Wunreachable-code -Wshadow -Wpedantic -Wno-conversion
 CPPVERSION = -std=c++17
 
 ARCHIVE_EXTENSION = zip
 
-MKDIR = mkdir build
-ifeq ($(shell echo "Windows"), "Windows")
+ifeq ($(OS), Windows_NT)
 	TARGET = $(PROJECT).exe
 	DEL = del
+	DEL_FLAGS = -Force
 	ZIPPER = tar -a -c -f
 	ZIP_NAME = $(PROJECT)_$(USERNAME).$(ARCHIVE_EXTENSION)
 	Q =
-	OBJECTS = $(patsubst %.cpp, build\%.o, $(notdir $(SRC_FILES)))
+	SEPERATOR=\\
 else
 	TARGET = $(PROJECT)
-	DEL = rm -f
+	DEL = rm
+	DEL_FLAGS = -f
 	ZIPPER = tar -acf
 	Q= "
 	ifeq ($(shell tar --version | grep -o "GNU tar"), GNU tar)
 		ARCHIVE_EXTENSION = tar.gz
 	endif
 	ZIP_NAME = $(PROJECT)_$(USERNAME).$(ARCHIVE_EXTENSION)
-	OBJECTS = $(patsubst %.cpp, build/%.o, $(notdir $(SRC_FILES)))
+	SEPERATOR=/
 endif
+
+# note to self: both () and {} can be used for variables
+PROJECT = final_project
+SRC_DIRS  = src$(SEPERATOR)assembler src$(SEPERATOR)misc \
+			src$(SEPERATOR)simulator src
+SRC_FILES = $(foreach dir, $(SRC_DIRS), $(wildcard ${dir}$(SEPERATOR)*.cpp))
+H_FILES   = $(foreach dir, $(SRC_DIRS), $(wildcard ${dir}$(SEPERATOR)*.h))
+OBJECTS = $(patsubst %.cpp, build$(SEPERATOR)%.o, $(notdir $(SRC_FILES)))
+REZ_FILES = resources/pseudo_assembly_assembler.png
+USERNAME  = santiago_sagastegui
+
+# https://www.gnu.org/software/make/manual/html_node/File-Name-Functions.html
+# this is why you read documentation, kids
 
 BUILD_DIR = build
 
-# order only prerequisite: don't build again, but ensure they exist
-
+# order only prerequisite: only build if it does not exist
 all: first second
-first: |$(BUILD_DIR)
+first: | $(BUILD_DIR)
 second: $(TARGET)
 
-# VPATH variable specifies list of directories to search for prerequisites
+# note to self: makefiles understand forward slash for file seperators,
+#     but windows doesn't, so anything that runns commands needs os specific
+#     file path seperators
+# note to self: for some reason, on windows, -p and -Force are interpreted as names instead
+# of flags
+$(BUILD_DIR):
+	mkdir build
+
+# VPATH variable specifies list of directories to search for prerequisites,
+# if prerequisite is not in current directory
 VPATH = $(SRC_DIRS)
-build/%.o: %.cpp
+build$(SEPERATOR)%.o: %.cpp
 	@echo "building $(notdir $<)"
 	@$(CXX) -o $@ -c $< $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN)
 
@@ -57,11 +68,10 @@ $(TARGET): $(OBJECTS)
 	@echo "building $@"
 	@$(CXX) -o $@ $^
 
-$(BUILD_DIR):
-	$(MKDIR)
-
-clean:
-	$(DEL) $(TARGET) $(OBJECTS)
+# Remove-Item (del) has some weird positional things going on
+clean: | $(BUILD_DIR)
+	@echo cleaning target and objects
+	@$(DEL) $(TARGET) $(wildcard build$(SEPERATOR)*.o) $(DEL_FLAGS)
 
 depend:
 	@sed --in-place=.bak '/^# DEPENDENCIES/,$$d' Makefile
@@ -75,8 +85,7 @@ submission: | $(BUILD_DIR)
 	@echo "...Zipping header files:   $(H_FILES) ..."
 	@echo "...Zipping resource files: $(REZ_FILES)..."
 	@echo "...Zipping Makefile ..."
-	$(ZIPPER) $(ZIP_NAME) $(SRC_FILES) $(H_FILES) $(REZ_FILES) $(BUILD_DIR) \
-		Makefile
+	$(ZIPPER) $(ZIP_NAME) $(SRC_FILES) $(H_FILES) $(REZ_FILES) Makefile
 	@echo "...$(ZIP_NAME) done!"
 
 debug:
@@ -85,7 +94,6 @@ debug:
 .PHONY: all clean depend submission debug
 .DEFAULT: all
 
-# L6A: -MM has no option to prefix a build dir
 # DEPENDENCIES
 build/blueprint.o: src/assembler/blueprint.cpp src/assembler/blueprint.h \
  src/assembler/../common_values.h
