@@ -21,7 +21,7 @@ CPU_Handle::CPU_Handle() {
         reg_h = 0;
         reg_cmp_a = 0;
         reg_cmp_b = 0;
-        prog_ctr = 0;
+        prog_ctr  = 0;
         prog_size = 0;
         stack_ptr = 0;
         // i know int16_t should always be 2 bytes, but whatever
@@ -59,7 +59,7 @@ void CPU_Handle::load_program(const std::deque<int16_t> given_program) {
 
 void print_arg(
         int16_t curr,
-        Program_State &curr_state,
+        Program_State_Enum &curr_state,
         size_t &num_args_left
 ) {
         // for little endian systems
@@ -95,14 +95,15 @@ void print_arg(
 
 void print_chars(
         int16_t curr,
-        Program_State &curr_state,
+        Program_State_Enum &curr_state,
         size_t &curr_str_idx)
 {
-        int16_t higher   = curr >> 8;
-        int16_t lower    = curr & 0xff;
-        bool is_str_end  = (curr == 0) && (curr_str_idx > 0);
+        // auxiliary variables
+        char lower  = (char)(curr  & 0b11111111);
+        char higher = (char)(curr >> 8);
+        bool is_str_beg  = (curr >  0)  && (curr_str_idx == 0);
+        bool is_str_end  = (curr == 0) && (curr_str_idx >  0);
         bool is_data_end = (curr == (int16_t)0xffff);
-        bool is_str_beg  = (curr_str_idx == 0) && (curr > 0);
 
         if (is_str_end) {
                 std::cout << "\"\n";
@@ -113,41 +114,42 @@ void print_chars(
                 curr_state = READING_MNEMONIC;
                 return;
         }
-        // ensure programs with no string don't
-        // add extraneous programs
         if (is_str_beg)
-                // start of string
                 std::cout << "\"";
         curr_str_idx += 2;
-        if (curr) {
-                if (lower == '\n')
-                        std::cout << "\\n";
-                else
-                        std::cout << (char)lower;
-                if (higher == '\n')
-                        std::cout << "\n";
-                else
-                        std::cout << (char)higher;
-        }
+        if (curr == 0)
+                return;
+        if (lower == '\n')
+                std::cout << "\\n";
+        else
+                std::cout << lower;
+        if (higher == '\n')
+                std::cout << "\\n";
+        else
+                std::cout << higher;
 }
 
-void print_entry_label(int16_t curr, Program_State &curr_state) {
-        std::cout << std::setbase(16);
-        std::cout << "--- Entry @ 0x" << curr << " ---\n";
+void print_entry_label(int16_t curr, Program_State_Enum &curr_state) {
+        std::cout << std::setbase(10);
+        std::cout << "--- Entry @ " << curr << " ---\n";
         std::cout << "--- String Data ---\n";
         curr_state = READING_STR;
 }
 
 void print_mnemonic(
         int16_t curr,
-        Program_State &curr_state,
-        size_t &num_args_left
+        Program_State_Enum &curr_state,
+        size_t &num_args_left,
+        int mnemonic_idx,
+        int int_idx
 ) {
         std::stringstream aux_stream;
         std::string aux_string;
-        // (0xff) INS ARG1  ARG2  ARG3
-        aux_stream << "( " << std::right << std::setw(2) <<  curr << " ) ";
-        aux_stream << DEREFERENCE_TABLE.at(curr);
+        // INS.INT: (OPCODE) MNEMONIC ARG1 ARG2 ARG3
+        aux_stream << std::right << std::setw(3) << mnemonic_idx << ".";
+        aux_stream << std::right << std::setw(3) << int_idx << ": ";
+        aux_stream << "(" << std::right << std::setw(2) <<  curr << ") ";
+        aux_stream << std::left << std::setw(6) << DEREFERENCE_TABLE.at(curr);
         std::getline(aux_stream, aux_string);
         std::cout << std::left << std::setw(14) << aux_string;
         num_args_left = BLUEPRINTS.at(DEREFERENCE_TABLE.at(curr)).size() - 1;
@@ -158,7 +160,7 @@ void print_mnemonic(
 }
 
 void CPU_Handle::interpret_program() const {
-        Program_State curr_state = READING_ENTRY_LABEL;
+        Program_State_Enum curr_state = READING_ENTRY_LABEL;
         size_t curr_str_idx = 0;
         size_t num_args_left = 0;
         int16_t header[4] = {
@@ -181,6 +183,8 @@ void CPU_Handle::interpret_program() const {
         }
 
         // start at 4 to skip magic numbers
+        int mnemonic_idx = 0;
+        int int_idx = 0;
         for (size_t i = 4; i < prog_size; ++i) {
                 int16_t curr = program_data[i];
                 switch (curr_state) {
@@ -190,10 +194,19 @@ void CPU_Handle::interpret_program() const {
                         print_entry_label(curr, curr_state);
                         break;
                 case READING_MNEMONIC:
-                        print_mnemonic(curr, curr_state, num_args_left);
+                        print_mnemonic(
+                                curr,
+                                curr_state,
+                                num_args_left,
+                                mnemonic_idx,
+                                int_idx
+                        );
+                        mnemonic_idx++;
+                        int_idx++;
                         break;
                 case READING_ARGS:
                         print_arg(curr, curr_state, num_args_left);
+                        int_idx++;
                         break;
                 case READING_STR:
                         print_chars(curr, curr_state, curr_str_idx);

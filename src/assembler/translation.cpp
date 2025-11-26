@@ -40,6 +40,7 @@ Debug_Info assemble_program(
                 program.push_back((int16_t)(0x0));
         // marks end of strings
         program.push_back((int16_t)(0xffff));
+        entry_offset++;
 
         // Step 2: add entry offset and magic number to beginning of program
         program.push_front(label_table.at("main") + entry_offset);

@@ -10,7 +10,7 @@
  * @brief describes current state of program
  * @details is also used in program interpretation
  */
-enum Program_State {
+enum Program_State_Enum {
         NONE,
         READING_ENTRY_LABEL,
         READING_STR,
@@ -69,7 +69,7 @@ public:
  */
 void print_arg(
         int16_t curr,
-        Program_State &curr_state,
+        Program_State_Enum &curr_state,
         size_t &num_args_left
 );
 
@@ -79,7 +79,7 @@ void print_arg(
  */
 void print_chars(
         int16_t curr,
-        Program_State &curr_state,
+        Program_State_Enum &curr_state,
         size_t &curr_str_idx
 );
 
@@ -87,7 +87,7 @@ void print_chars(
  * @brief helper function of CPU_Handle::interpret_program
  * @detail arguments come from CPU_Handle::interpret_program
  */
-void print_entry_label(int16_t curr, Program_State &curr_state);
+void print_entry_label(int16_t curr, Program_State_Enum &curr_state);
 
 /**
  * @brief helper function of CPU_Handle::interpret_program
@@ -95,8 +95,10 @@ void print_entry_label(int16_t curr, Program_State &curr_state);
  */
 void print_mnemonic(
         int16_t curr,
-        Program_State &curr_state,
-        size_t &num_args_left
+        Program_State_Enum &curr_state,
+        size_t &num_args_left,
+        int mnemonic_idx,
+        int int_idx
 );
 
 /**

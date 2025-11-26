@@ -18,16 +18,20 @@ bool Cmd_Options::handle_cmd_args(int argc, char **argv) {
                 return true;
         for (int i = 1; i < argc; ++i) {
                 std::string curr_arg = argv[i];
-                if (curr_arg == "-a" || curr_arg == "--assemble-only")
+                if (curr_arg == "-a" || curr_arg == "--assemble-only") {
                         assemble_only = true;
-                else if (curr_arg == "-b" || curr_arg == "--binary-input")
+                } else if (curr_arg == "-b" || curr_arg == "--binary-input") {
                         is_binary_input = true;
-                else if (curr_arg == "-h" || curr_arg == "--help")
+                } else if (curr_arg == "-h" || curr_arg == "--help") {
                         executable_help = true;
-                else if (curr_arg == "-s" || curr_arg == "--save-temps")
+                } else if (curr_arg == "-s" || curr_arg == "--save-temps") {
                         intermediate_files = true;
-                else
+                } else if (curr_arg[0] == '-') {
+                        std::cout << "Unrecognized option: " << curr_arg << "\n";
+                        return false;
+                } else {
                         input_file_idx = i;
+                }
         }
         // combination of flags that are either incompatible or
         // cause an early return
