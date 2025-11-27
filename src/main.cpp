@@ -7,20 +7,21 @@
  * Also hosted at https://github.com/Santi-I-Guess/final_project
  */
 
-#include <fstream>
 #include <deque>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <string>
 
-#include "auxiliary.h"
-#include "common_values.h"
 #include "assembler/blueprint.h"
 #include "assembler/tokenizer.h"
 #include "assembler/translation.h"
+#include "auxiliary.h"
+#include "common_values.h"
 #include "misc/cmd_line_opts.h"
 #include "misc/file_handling.h"
 #include "simulator/cpu_handle.h"
+#include "simulator/debug_funcs.h"
 
 // every subdirectory of src is isolated in dependencies and function
 // make tests eventually
@@ -110,7 +111,7 @@ int main(int argc, char **argv) {
         cpu_handle.load_program(final_program);
 
         if (life_opts.debug_options)
-                cpu_handle.interpret_program();
+                interpret_program(cpu_handle);
 //      cpu_handle.run_program();
 
         return 0;

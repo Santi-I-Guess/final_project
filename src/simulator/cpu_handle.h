@@ -52,48 +52,19 @@ class CPU_Handle {
         int16_t prog_ctr; /** program counter / instruction pointer */
         int16_t stack_ptr; /** stack counter / pointer */
         int16_t program_mem[2048]; /** holds ram and stack memory */
-        int16_t *program_data; /** assembled program */
-
-        size_t prog_size; /** size of program data */
 public:
+        int16_t *program_data; /** assembled program */
+        int16_t prog_size; /** size of program data */
         CPU_Handle();
         ~CPU_Handle();
         void load_program(const std::deque<int16_t> given_program);
-        void interpret_program() const;
 };
-
-/**
- * @brief helper function of CPU_Handle::interpret_program
- * @detail arguments come from CPU_Handle::interpret_program
- */
-void print_chars(
-        int16_t curr,
-        Program_State_Enum &curr_state,
-        size_t &curr_str_idx
-);
-
-/**
- * @brief helper function of CPU_Handle::interpret_program
- * @detail arguments come from CPU_Handle::interpret_program
- */
-void print_instruction(
-        int16_t curr,
-        int16_t &mnemonic_idx,
-        int16_t &int_idx,
-        int16_t *program_data
-);
 
 /**
  * @fn void CPU_Handle::load_program(const std::deque<int16_t> given_program)
  * @brief loads elements of given_program to program_data
  * @details also allocates program_data member to have enough space to load
  * given_data, since string data may be large
- */
-
-/**
- * @fn void CPU_Handle::interpret_program() const;
- * @brief print final_program's interpretation of loaded programA
- * @detail debugging function
  */
 
 #endif
