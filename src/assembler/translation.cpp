@@ -20,7 +20,7 @@ Debug_Info assemble_program(
         std::map<int16_t, int16_t> &str_idx_offsets = program_info.str_idx_offsets;
 
         // Step 1: calculate string data offset, store string idx offsets
-        int16_t entry_offset = 5; // main label + 'SA' 'NT' 'IA' 'GO'
+        int16_t entry_offset = 5; // 'SA','NT','IA','GO',entry_addr
         int16_t num_strings = 0;
         for (std::string i : tokens) {
                 if (i.back() != '\"')
@@ -36,8 +36,10 @@ Debug_Info assemble_program(
         }
 
         // ensure 0 element buffer between entry addr and first opcode
-        if (num_strings == 0)
+        if (num_strings == 0) {
                 program.push_back((int16_t)(0x0));
+                entry_offset++;
+        }
         // marks end of strings
         program.push_back((int16_t)(0xffff));
         entry_offset++;

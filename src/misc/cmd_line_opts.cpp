@@ -9,6 +9,7 @@ Cmd_Options::Cmd_Options() {
         input_file_idx        = -1;
         is_binary_input       = false;
         intermediate_files    = false;
+        debug_options         = false;
 }
 
 /* auxiliary function to handle command line arguments
@@ -26,6 +27,8 @@ bool Cmd_Options::handle_cmd_args(int argc, char **argv) {
                         executable_help = true;
                 } else if (curr_arg == "-s" || curr_arg == "--save-temps") {
                         intermediate_files = true;
+                } else if (curr_arg == "-d" || curr_arg == "--debug") {
+                        debug_options = true;
                 } else if (curr_arg[0] == '-') {
                         std::cout << "Unrecognized option: " << curr_arg << "\n";
                         return false;
@@ -55,6 +58,8 @@ void print_help() {
         "      assemble ascii source file into a binary file, and quit.\n\n"
         "  -b, --binary-input\n"
         "      use a preassembled binary file instead of a ascii source file\n\n"
+        "  -d, --debug\n"
+        "      enable debug symbols for interpreting and running the program\n\n"
         "  -h, --help\n"
         "      show this help screen\n\n"
         "  -s, --save-temps\n"

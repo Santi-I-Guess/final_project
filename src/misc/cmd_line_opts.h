@@ -15,6 +15,7 @@ struct Cmd_Options {
         int input_file_idx;         ///< init to -1
         bool intermediate_files;    ///< -s
         bool is_binary_input;       ///< -b
+        bool debug_options;         ///< -d
 
         Cmd_Options();
         bool handle_cmd_args(int argc, char **argv); ///< stores flags

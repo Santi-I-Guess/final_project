@@ -15,7 +15,6 @@ enum Program_State_Enum {
         READING_ENTRY_LABEL,
         READING_STR,
         READING_MNEMONIC,
-        READING_ARGS,
 };
 
 /**
@@ -67,16 +66,6 @@ public:
  * @brief helper function of CPU_Handle::interpret_program
  * @detail arguments come from CPU_Handle::interpret_program
  */
-void print_arg(
-        int16_t curr,
-        Program_State_Enum &curr_state,
-        size_t &num_args_left
-);
-
-/**
- * @brief helper function of CPU_Handle::interpret_program
- * @detail arguments come from CPU_Handle::interpret_program
- */
 void print_chars(
         int16_t curr,
         Program_State_Enum &curr_state,
@@ -87,18 +76,11 @@ void print_chars(
  * @brief helper function of CPU_Handle::interpret_program
  * @detail arguments come from CPU_Handle::interpret_program
  */
-void print_entry_label(int16_t curr, Program_State_Enum &curr_state);
-
-/**
- * @brief helper function of CPU_Handle::interpret_program
- * @detail arguments come from CPU_Handle::interpret_program
- */
-void print_mnemonic(
+void print_instruction(
         int16_t curr,
-        Program_State_Enum &curr_state,
-        size_t &num_args_left,
-        int mnemonic_idx,
-        int int_idx
+        int16_t &mnemonic_idx,
+        int16_t &int_idx,
+        int16_t *program_data
 );
 
 /**

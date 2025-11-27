@@ -108,7 +108,9 @@ int main(int argc, char **argv) {
 
         CPU_Handle cpu_handle;
         cpu_handle.load_program(final_program);
-        cpu_handle.interpret_program();
+
+        if (life_opts.debug_options)
+                cpu_handle.interpret_program();
 //      cpu_handle.run_program();
 
         return 0;
