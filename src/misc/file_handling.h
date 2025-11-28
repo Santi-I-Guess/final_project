@@ -15,20 +15,26 @@ void generate_intermediates(std::string file_header,
                             std::map<std::string, int16_t> label_table);
 
 /**
- * @brief populates final program from input if -b flag is given
+ * @brief gets user program, either from file or stdin
+ * @details may exit if source_path fails
  */
-void populate_program_from_binary(std::deque<int16_t> &program, std::string filepath);
+std::string get_source_buffer(std::string source_path, bool use_stdin);
 
 /**
- * @brief reads ascii source file into buffer
- * @details istream instead of ifstream to ensure std::cin works as in input
+ * @brief populates final program from input if -b flag is given
  */
-std::string read_file_to_buffer(std::ifstream &source_file);
+void populate_program_from_binary(
+        std::deque<int16_t> &program,
+        std::string filepath
+);
 
 /**
  * @brief writes intermediate file for label
  */
-bool write_labels_to_sink(std::map<std::string, int16_t> label_table, std::string header);
+bool write_labels_to_sink(
+        std::map<std::string, int16_t> label_table,
+        std::string header
+);
 
 /**
  * @brief writes intermediate file for assembled progra

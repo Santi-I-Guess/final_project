@@ -26,8 +26,6 @@
 // every subdirectory of src is isolated in dependencies and function
 // make tests eventually
 
-// TODO: allow piping in program if no file path is provided
-
 int main(int argc, char **argv) {
         Cmd_Options life_opts;
         bool valid_cmd_arg_combo = life_opts.handle_cmd_args(argc, argv);
@@ -58,22 +56,9 @@ int main(int argc, char **argv) {
                 std::string source_buffer = "";
                 if (life_opts.input_file_idx != -1) {
                         std::string source_path = argv[life_opts.input_file_idx];
-                        std::ifstream source_file(source_path);
-                        if (source_file.fail()) {
-                                std::cerr << "Failed to open input file\n";
-                                return 1;
-                        }
-                        source_buffer = read_file_to_buffer(source_file);
-                        source_file.close();
+                        source_buffer = get_source_buffer(source_path, false);
                 } else {
-                        source_buffer = "";
-                        while (1) {
-                                std::string aux_string = "";
-                                std::getline(std::cin, aux_string);
-                                if (aux_string == "; EOF")
-                                        break;
-                                source_buffer += aux_string + "\n";
-                        }
+                        source_buffer = get_source_buffer("", true);
                 }
 
                 // Step 1: tokenize and define labels

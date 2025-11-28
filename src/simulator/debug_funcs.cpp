@@ -161,5 +161,4 @@ void interpret_program(const CPU_Handle &cpu_handle) {
                         break;
                 }
         }
-        std::cout << "\n";
 }
