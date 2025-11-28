@@ -1,9 +1,5 @@
-# generate gibberish that"s syntatically correct and but algorithmically
-# worthless: for testing tokenization, definition, and translation
-# guarenteed to have these properties:
-# - instructions will precede correct number and types of arguments
-# - main defined somewhere before EXIT
-# - all labels used are defined
+# generates valid and invalid gibberish programs, and saves them to the
+# example_programs directory
 
 import os      # path.abspathj
 import random
@@ -13,15 +9,13 @@ import sys     # argv
 import instructions
 
 
-# ensure correct target directory regardless of where generator is run
-# for any bash scripts that come later to automate testing process
 def get_num_tests() -> int:
     if len(sys.argv) != 2:
         return 16
     if sys.argv[1].isdigit():
         num_tests = int(sys.argv[1])
         return num_tests
-    message = "{sys.argv[1]} is not a valid positive int: exitting..."
+    message = f"{sys.argv[1]} is not a valid positive int: exitting..."
     print(f"\x1b[31m{message}\x1b[0m", file=sys.stderr)
     return 0
 
@@ -57,6 +51,7 @@ def print_ins(curr_ins, max_sizes, sink):
     print(print_str, end="", file=sink)
 
 
+# writes a program to a file
 def write_program(sink, program_buffer, message) -> None:
     max_sizes = get_alignments(program_buffer)
     print(message, file=sink)
@@ -68,6 +63,7 @@ def write_program(sink, program_buffer, message) -> None:
             print_ins(curr_ins, max_sizes, sink)
             print(f"; ins #{ins_num}", file=sink)
             ins_num += 1
+
 
 if __name__ == "__main__":
     num_tests = get_num_tests()
@@ -81,7 +77,7 @@ if __name__ == "__main__":
         program_buffer = instructions.gen_raw_program()
         program_buffer = instructions.insert_label_defs(program_buffer)
         instructions.quick_check(program_buffer)
-        file_name = f"{DUMP_DIR}/gib_valid_example_{file_idx:0>2}.txt"
+        file_name = f"{DUMP_DIR}/gib_valid_example_{file_idx:0>3}.txt"
         with open(file_name, "w") as sink:
             message = "; -- gibberish valid program --"
             write_program(sink, program_buffer, message)
@@ -94,7 +90,7 @@ if __name__ == "__main__":
         program_buffer = instructions.insert_label_defs(program_buffer)
         instructions.quick_check(program_buffer)
         program_buffer = instructions.insert_errors(program_buffer, error_bits)
-        file_name = f"{DUMP_DIR}/gib_error_example_{file_idx:0>2}.txt"
+        file_name = f"{DUMP_DIR}/gib_error_example_{file_idx:0>3}.txt"
         message: str = "; -- gibberish erroneous program --"
         if error_bits[0]:  # EXPECTED_MNEMONIC
             message += "\n; EXPECTED_MNEMONIC"

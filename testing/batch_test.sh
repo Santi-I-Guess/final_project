@@ -23,20 +23,6 @@ if [[ ! -d ${testing_dir}/example_programs ]]; then
     mkdir ${testing_dir}/example_programs
 fi
 
-# only regenerate files
-if [[ $# -eq 1 ]]; then
-    if [[ $1 == regenerate ]]; then
-        # only try to delete example_programs if they already exist
-        if [[ -f ${testing_dir}/example_programs/* ]]; then
-            for i in ${testing_dir}/example_programs/*; do
-                rm $i
-            done
-        fi
-        python3 ${test_gen}
-    fi
-    exit
-fi
-
 # test valid, then test error
 for i in ${testing_dir}/example_programs/gib_valid_*; do
     printf "\x1b[32m${i}\x1b[0m:\n"

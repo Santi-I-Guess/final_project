@@ -1,3 +1,6 @@
+# generates atoms, valid gibberish programs, and invalid gibberish programs
+
+
 from enum import Enum
 import math
 import random
