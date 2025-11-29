@@ -10,11 +10,11 @@ some changes to make usage simple.
 # Quick Reference
 
 ## Assembler Flags
-- -c, --compile-only
+- -a, --assemble-only
+- -b, --binary-input
+- -d, --debug
 - -h, --help
 - -s, --save-temps
-- -b, --binary-input
-- -p, --print-step
 
 ## Assembly Language
 - 16 bit registers
@@ -47,6 +47,7 @@ some changes to make usage simple.
 | JMP          | label     |           |           |
 | JEQ          | label     |           |           |
 | JNE          | label     |           |           |
+| JGE          | label     |           |           |
 | JGR          | label     |           |           |
 | JLE          | label     |           |           |
 | JLS          | label     |           |           |

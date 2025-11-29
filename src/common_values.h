@@ -94,6 +94,7 @@ const std::map<std::string, std::deque<Atom_Type>> BLUEPRINTS = {
         {"LSH",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
         {"RSH",    {MNEMONIC, REGISTER, SOURCE, SOURCE} },
         {"CMP",    {MNEMONIC, SOURCE,   SOURCE        } },
+        {"JMP",    {MNEMONIC, LABEL                   } },
         {"JEQ",    {MNEMONIC, LABEL                   } },
         {"JNE",    {MNEMONIC, LABEL                   } },
         {"JGE",    {MNEMONIC, LABEL                   } },
@@ -108,7 +109,7 @@ const std::map<std::string, std::deque<Atom_Type>> BLUEPRINTS = {
         {"READ",   {MNEMONIC, REGISTER, LITERAL_INT   } },
         {"PRINT",  {MNEMONIC, SOURCE                  } },
         {"SPRINT", {MNEMONIC, LITERAL_STR             } },
-        {"EXIT",   {MNEMONIC                          } },
+        {"EXIT",   {MNEMONIC,                         } },
 };
 
 
@@ -116,24 +117,37 @@ const std::map<std::string, std::deque<Atom_Type>> BLUEPRINTS = {
  * @brief hashmap for valid opcodes for each mnemoinc in assembly language
  */
 const std::map<std::string, int16_t> OPCODE_TABLE = {
-        {"NOP",    0}, {"MOV",     1}, {"INC",   2},
-        {"DEC",    3}, {"ADD",     4}, {"SUB",   5},
-        {"MUL",    6}, {"DIV",     7}, {"AND",   8},
-        {"OR",     9}, {"NOT",    10}, {"XOR",  11},
-        {"LSH",   12}, {"RSH",    13}, {"CMP",  14},
-        {"JEQ",   15}, {"JNE",    16}, {"JGE",  17},
-        {"JGR",   18}, {"JLE",    19}, {"JLS",  20},
-        {"CALL",  21}, {"RET",    22}, {"PUSH", 23},
-        {"POP",   24}, {"WRITE",  25}, {"READ", 26},
-        {"PRINT", 27}, {"SPRINT", 28}, {"EXIT", 29},
+        {"NOP",    0}, {"MOV",     1}, {"INC",    2}, {"DEC",   3},
+        {"ADD",    4}, {"SUB",     5}, {"MUL",    6}, {"DIV",   7},
+        {"AND",    8}, {"OR",      9}, {"NOT",   10}, {"XOR",  11},
+        {"LSH",   12}, {"RSH",    13}, {"CMP",   14}, {"JMP",  15},
+        {"JEQ",   16}, {"JNE",    17}, {"JGE",   18}, {"JGR",  19},
+        {"JLE",   20}, {"JLS",    21}, {"CALL",  22}, {"RET",  23},
+        {"PUSH",  24}, {"POP",    25}, {"WRITE", 26}, {"READ", 27},
+        {"PRINT", 28}, {"SPRINT", 29}, {"EXIT",  30},
+};
+
+/**
+ * @brief dereference hashmap for CPU_Handle::interpret_program()
+ * @details opposite hashmap to OPCODE_TABLE
+ */
+const std::map<int16_t, std::string> DEREFERENCE_TABLE = {
+        {0,    "NOP"}, {1,     "MOV"}, {2,    "INC"}, {3,   "DEC"},
+        {4,    "ADD"}, {5,     "SUB"}, {6,    "MUL"}, {7,   "DIV"},
+        {8,    "AND"}, {9,      "OR"}, {10,   "NOT"}, {11,  "XOR"},
+        {12,   "LSH"}, {13,    "RSH"}, {14,   "CMP"}, {15,  "JMP"},
+        {16,   "JEQ"}, {17,    "JNE"}, {18,   "JGE"}, {19,  "JGR"},
+        {20,   "JLE"}, {21,    "JLS"}, {22,  "CALL"}, {23,  "RET"},
+        {24,  "PUSH"}, {25,    "POP"}, {26, "WRITE"}, {27, "READ"},
+        {28, "PRINT"}, {29, "SPRINT"}, {30,  "EXIT"}
 };
 
 /**
  * @brief hashmap for valid callable registers in assembly language
  */
 const std::map<std::string, int16_t> REGISTER_TABLE = {
-        {"RA",  0}, {"RB",  1}, {"RC",    2}, {"RD", 3},
-        {"RE",  4}, {"RF",  5}, {"RG",    6}, {"RH", 7},
+        {"RA",  0}, {"RB",  1}, {"RC",    2}, {"RD",    3},
+        {"RE",  4}, {"RF",  5}, {"RG",    6}, {"RH",    7},
         {"RSP", 8}, {"RIP", 9}, {"CMP0", 10}, {"CMP1", 11}
 };
 

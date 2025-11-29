@@ -18,23 +18,6 @@ enum Program_State_Enum {
 };
 
 /**
- * @brief dereference hashmap for CPU_Handle::interpret_program()
- * @details opposite hashmap to OPCODE_TABLE in common_values.h
- */
-const std::map<int16_t, std::string> DEREFERENCE_TABLE = {
-        {0,    "NOP"}, {1,     "MOV"}, {2,   "INC"},
-        {3,    "DEC"}, {4,     "ADD"}, {5,   "SUB"},
-        {6,    "MUL"}, {7,     "DIV"}, {8,   "AND"},
-        {9,     "OR"}, {10,    "NOT"}, {11,  "XOR"},
-        {12,   "LSH"}, {13,    "RSH"}, {14,  "CMP"},
-        {15,   "JEQ"}, {16,    "JNE"}, {17,  "JGE"},
-        {18,   "JGR"}, {19,    "JLE"}, {20,  "JLS"},
-        {21,  "CALL"}, {22,    "RET"}, {23, "PUSH"},
-        {24,   "POP"}, {25,  "WRITE"}, {26, "READ"},
-        {27, "PRINT"}, {28, "SPRINT"}, {29, "EXIT"},
-};
-
-/**
  * @brief Container class for memory during program simulation
  */
 class CPU_Handle {

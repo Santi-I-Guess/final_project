@@ -41,7 +41,8 @@ int16_t translate_token(
         std::string token,
         Atom_Type atom_type,
         Program_Info program_info,
-        int16_t num_seen_strs
+        int16_t num_seen_strs,
+        int16_t entry_offset
 );
 
 #endif

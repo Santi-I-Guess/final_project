@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include "cpu_handle.h"
 #include "debug_funcs.h"
 #include "../common_values.h"
 
@@ -139,7 +138,7 @@ void interpret_program(const CPU_Handle &cpu_handle) {
                 case NONE:
                         break;
                 case READING_ENTRY_LABEL:
-                        std::cout << "--- Entry @ " << curr << " ---\n";
+                        std::cout << "--- Main @ " << curr << " ---\n";
                         std::cout << "--- String Data ---\n";
                         curr_state = READING_STR;
                         int_idx++;

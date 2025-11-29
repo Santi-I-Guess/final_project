@@ -73,7 +73,8 @@ Debug_Info assemble_program(
                                 tokens.at(idx),
                                 curr_blueprint.at(idx),
                                 program_info,
-                                num_seen_strs
+                                num_seen_strs,
+                                entry_offset
                         );
                         program.push_back(translated);
                         if (curr_blueprint.at(idx) == LITERAL_STR)
@@ -146,14 +147,15 @@ std::deque<int16_t> translate_string(std::string stripped_quote) {
 }
 
 int16_t translate_token(std::string token, Atom_Type atom_type,
-                        Program_Info program_info, int16_t num_seen_strs) {
+                        Program_Info program_info, int16_t num_seen_strs,
+                        int16_t entry_offset) {
         std::map<int16_t, int16_t> str_idx_offsets = program_info.str_idx_offsets;
         std::map<std::string, int16_t> label_table = program_info.label_table;
         std::stringstream aux_stream;
         int16_t aux_int;
         switch (atom_type) {
         case LABEL:
-                return label_table.at(token);
+                return label_table.at(token) + entry_offset;
         case LITERAL_INT:
                 token = token.substr(1, token.length() - 1);
                 aux_stream << token;
@@ -168,11 +170,11 @@ int16_t translate_token(std::string token, Atom_Type atom_type,
                 return REGISTER_TABLE.at(token);
         case SOURCE:
                 if (token.front() == '$')
-                        return translate_token(token, LITERAL_INT, program_info, num_seen_strs);
+                        return translate_token(token, LITERAL_INT, program_info, num_seen_strs, entry_offset);
                 else if (token.front() == 'R')
-                        return translate_token(token, REGISTER, program_info, num_seen_strs);
+                        return translate_token(token, REGISTER, program_info, num_seen_strs, entry_offset);
                 else
-                        return translate_token(token, STACK_OFFSET, program_info, num_seen_strs);
+                        return translate_token(token, STACK_OFFSET, program_info, num_seen_strs, entry_offset);
         case STACK_OFFSET:
                 token = token.substr(1, token.length() - 1);
                 aux_stream << token;

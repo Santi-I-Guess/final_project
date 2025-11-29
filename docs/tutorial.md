@@ -110,6 +110,7 @@ instruction. Failing to do so causes an assembler error.
 | JMP          | label     |           |           | goto label                 |
 | JEQ          | label     |           |           | goto label if cmp0 == cmp1 |
 | JNE          | label     |           |           | goto label if cmp0 != cmp1 |
+| JGE          | label     |           |           | goto label if cmp0 >= cmp1 |
 | JGR          | label     |           |           | goto label if cmp0 >  cmp1 |
 | JLE          | label     |           |           | goto label if cmp0 <= cmp1 |
 | JLS          | label     |           |           | goto label if cmp0 <  cmp1 |
