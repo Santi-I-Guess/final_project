@@ -9,7 +9,7 @@ Cmd_Options::Cmd_Options() {
         input_file_idx        = -1;
         is_binary_input       = false;
         intermediate_files    = false;
-        debug_options         = false;
+        is_debug         = false;
 }
 
 /* auxiliary function to handle command line arguments
@@ -28,7 +28,7 @@ bool Cmd_Options::handle_cmd_args(int argc, char **argv) {
                 } else if (curr_arg == "-s" || curr_arg == "--save-temps") {
                         intermediate_files = true;
                 } else if (curr_arg == "-d" || curr_arg == "--debug") {
-                        debug_options = true;
+                        is_debug = true;
                 } else if (curr_arg[0] == '-') {
                         std::cout << "Unrecognized option: " << curr_arg << "\n";
                         return false;
@@ -41,8 +41,17 @@ bool Cmd_Options::handle_cmd_args(int argc, char **argv) {
         if (executable_help) {
                 print_help();
                 return false;
-        } else if (is_binary_input && (assemble_only)) {
-                std::cout << "Binary input is already assembled\n";
+        } else if (assemble_only && is_binary_input) {
+                std::cout << "Flag Error: Binary input is redundant, and will";
+                std::cout << "not be regenerated with assemble-only\n";
+                return false;
+        } else if (assemble_only && is_debug) {
+                std::cout << "Flag Error: PAL Debugger (pdb) does not run";
+                std::cout << " with assemble-only\n";
+                return false;
+        } else if (is_binary_input && intermediate_files) {
+                std::cout << "Flag Error: No intermediate files are generated";
+                std::cout << " with pre-assembled input\n";
                 return false;
         }
         return true;
@@ -59,7 +68,7 @@ void print_help() {
         "  -b, --binary-input\n"
         "      use a preassembled binary file instead of a ascii source file\n\n"
         "  -d, --debug\n"
-        "      enable debug symbols for interpreting and running the program\n\n"
+        "      enable PAL debugger (pdb) when running the program\n\n"
         "  -h, --help\n"
         "      show this help screen\n\n"
         "  -s, --save-temps\n"

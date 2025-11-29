@@ -90,9 +90,6 @@ submission: | $(BUILD_DIR)
 	$(ZIPPER) $(ZIP_NAME) $(SRC_FILES) $(H_FILES) $(REZ_FILES) Makefile
 	@echo "...$(ZIP_NAME) done!"
 
-debug:
-	g++ $(SRC_FILES) -DDEBUG -fsanitize=address -o $(TARGET)
-
 .PHONY: all clean depend submission debug
 .DEFAULT: all
 

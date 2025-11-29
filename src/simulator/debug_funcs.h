@@ -8,8 +8,7 @@
 /**
  * @brief print interpretation of assembled program, along with addresses
  * @details debugging only function: mostly used for branching instruction
- * debugging. Note to self: if this is not a reference, then it frees the
- * program data twice.
+ * debugging. Reason this is not a member method is to keep modules seperate
  */
 void interpret_program(const CPU_Handle &cpu_handle);
 
@@ -35,5 +34,16 @@ void print_instruction(
         int16_t &int_idx,
         int16_t *program_data
 );
+
+/**
+ * @brief prints PAL debugger help when debug flag is on
+ */
+void print_pdb_help();
+
+/**
+ * @brief prints next instruction, in a similar format to interpret_program
+ * @details helper function of CPU_Handle::run_program in debug mode
+ */
+void print_instruction_simple(int16_t *program_data, int16_t prog_ctr);
 
 #endif

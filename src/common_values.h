@@ -128,6 +128,21 @@ const std::map<std::string, int16_t> OPCODE_TABLE = {
 };
 
 /**
+ * @brief table for lengths, in opcode order, for instruction functions
+ * @details generated via a for loop over BLUEPRINTS, to avoid error
+ */
+const int16_t INSTRUCTION_LENS[31] = {
+        1, 3, 2, 2,
+        4, 4, 4, 4,
+        4, 4, 3, 4,
+        4, 4, 3, 2,
+        2, 2, 2, 2,
+        2, 2, 2, 1,
+        2, 2, 3, 3,
+        2, 2, 1
+};
+
+/**
  * @brief dereference array for CPU_Handle::interpret_program()
  * @details opposite to OPCODE_TABLE
  */

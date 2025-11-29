@@ -3,6 +3,7 @@ build/*
 docs/html
 docs/man
 testing/__pycache__
+*.bin
 *.ods
 *.pdf
 *.txt

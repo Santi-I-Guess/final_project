@@ -1,8 +1,11 @@
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 #include "debug_funcs.h"
 #include "../common_values.h"
+
+#define BOLD "\x1b[1m"
+#define CLEAR "\x1b[0m"
 
 void print_chars(
         int16_t curr,
@@ -66,15 +69,14 @@ void print_instruction(
         out_stream << std::right << std::setw(3) << mnemonic_idx << " ";
         out_stream << std::right << std::setw(7) << mnem_name;
         out_string = out_stream.str();
-        int_idx++;
 
         // set each argument to be right aligned with 7 chars
-        int16_t num_args = (int16_t)(BLUEPRINTS.at(mnem_name).size() - 1);
-        for (int i = 0; i < num_args; ++i) {
+        int16_t ins_size = (int16_t)(BLUEPRINTS.at(mnem_name).size());
+        for (int arg_idx = 1; arg_idx < ins_size; ++arg_idx) {
                 std::stringstream arg_stream;
                 std::string arg_string;
-                int16_t curr_arg = program_data[int_idx + i];
-                Atom_Type arg_type = BLUEPRINTS.at(mnem_name)[i+1];
+                int16_t curr_arg = program_data[int_idx + arg_idx];
+                Atom_Type arg_type = BLUEPRINTS.at(mnem_name)[arg_idx];
                 if ((curr_arg >> 14) & 1) {
                         // literal bitmask
                         if (curr_arg >= 0)
@@ -101,7 +103,7 @@ void print_instruction(
         out_string = out_stream.str();
         std::cout << out_string << "\n";
         mnemonic_idx++;
-        int_idx += num_args;
+        int_idx += ins_size;
 }
 
 void interpret_program(const CPU_Handle &cpu_handle) {
@@ -160,4 +162,75 @@ void interpret_program(const CPU_Handle &cpu_handle) {
                         break;
                 }
         }
+}
+
+void print_pdb_help() {
+        // if you're wondering why I don't just use std::endl, it's because
+        // I'm trying to prevent stdout flushing every single line
+        std::cout << BOLD "break" CLEAR " <program address>\n";
+        std::cout << "    set a breakpoint at a specified address, which halts execution\n";
+        std::cout << BOLD "clear" CLEAR "\n";
+        std::cout << "    clear the console\n";
+        std::cout << BOLD "continue" CLEAR "\n";
+        std::cout << "    continue program execution until EXIT or next breakpoint\n";
+        std::cout << BOLD "delete" CLEAR " <program address>\n";
+        std::cout << "    delete breakpoint at a specified address\n";
+        std::cout << BOLD "help" CLEAR "\n";
+        std::cout << "    show this help screen\n";
+        std::cout << BOLD "interpret" CLEAR "\n";
+        std::cout << "    show disassembled program.\n";
+        std::cout << BOLD "list" CLEAR "\n";
+        std::cout << "    show the next instruction to be performed\n";
+        std::cout << "    useful for debugging branching instructions and SPRINT\n";
+        std::cout << BOLD "step" CLEAR "\n";
+        std::cout << "    continue program until next instruction\n";
+        std::cout << BOLD "print" CLEAR " <register|stack offset|ram address>\n";
+        std::cout << "    print value in program's memory\n";
+        std::cout << BOLD "quit" CLEAR "\n";
+        std::cout << "    quit debugger and program execution\n\n";
+}
+
+
+void print_instruction_simple(int16_t *program_data, int16_t prog_ctr) {
+        // most of this is just copy and paste from print_instruction
+        std::string out_string = "";
+        std::stringstream out_stream;
+
+        // first, the mnemoinc
+        int16_t curr = program_data[prog_ctr];
+        std::string mnem_name = DEREFERENCE_TABLE[curr];
+        out_stream << std::right << std::setw(7) << mnem_name;
+
+        // second, the arguments
+        int16_t ins_size = (int16_t)(BLUEPRINTS.at(mnem_name).size());
+        for (int arg_idx = 1; arg_idx < ins_size; ++arg_idx) {
+                std::string arg_string = "";
+                std::stringstream arg_stream;
+                int16_t curr_arg = program_data[prog_ctr + arg_idx];
+                Atom_Type arg_type = BLUEPRINTS.at(mnem_name)[arg_idx];
+                if ((curr_arg >> 14) & 1) {
+                        // literal bitmask
+                        if (curr_arg >= 0)
+                                curr_arg ^= (int16_t)(1 << 14);
+                        arg_stream << "$";
+                        arg_stream << curr_arg;
+                } else if ((curr_arg >> 13) & 1) {
+                        // stack offset bitmask
+                        curr_arg ^= (int16_t)(1 << 13);
+                        arg_stream << "%";
+                        arg_stream << curr_arg;
+                } else if ((arg_type == REGISTER) || (arg_type == SOURCE)) {
+                        arg_stream << "R";
+                        arg_stream << (char)('A' + curr_arg);
+                } else {
+                        arg_stream << "#";
+                        arg_stream << curr_arg;
+                }
+                arg_string = arg_stream.str();
+                out_stream << std::right << std::setw(8) << arg_string;
+        }
+
+        // print instruction buffer
+        out_string = out_stream.str();
+        std::cout << out_string << "\n";
 }
