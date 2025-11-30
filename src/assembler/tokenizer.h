@@ -2,7 +2,7 @@
 #define TOKENIZER_H
 
 #include <cstddef>
-#include <deque>
+#include <vector>
 #include <string>
 
 /**
@@ -10,7 +10,7 @@
  * @brief invalid tokens won't signal an error immediately, but will cause
  * MISSING_ARGUMENTS or INVALID_ATOM down the line
  */
-std::deque<std::string> create_tokens(const std::string source_buffer);
+std::vector<std::string> create_tokens(const std::string source_buffer);
 
 /**
  * @brief finds the size of the next string

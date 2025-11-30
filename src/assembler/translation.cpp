@@ -1,4 +1,4 @@
-#include <deque>
+#include <vector>
 #include <map>
 #include <string>
 #include <sstream>
@@ -10,67 +10,77 @@
 // TODO: refactor instances of 80+ chars
 
 Debug_Info assemble_program(
-        std::deque<int16_t> &program,
+        std::vector<int16_t> &program,
         Program_Info program_info
 ) {
         Debug_Info context;
         context.assembler_retval = ACCEPTABLE_2;
-        std::deque<std::string> &tokens = program_info.tokens;
+        std::vector<std::string> &tokens = program_info.tokens;
         std::map<std::string, int16_t> &label_table = program_info.label_table;
         std::map<int16_t, int16_t> &str_idx_offsets = program_info.str_idx_offsets;
 
-        // Step 1: calculate string data offset, store string idx offsets
-        int16_t entry_offset = 5; // 'SA','NT','IA','GO',entry_addr
+        // Step 1: calculate entry_offset, store string idx offsets
+        int16_t entry_offset = 5; // 'SA','NT','IA','GO', entry_addr
         int16_t num_strings = 0;
         for (std::string i : tokens) {
+                // skip if not a string
                 if (i.back() != '\"')
                         continue;
                 i = i.substr(1, i.length() - 2); // strip quotes
-                std::deque<int16_t> string_output = translate_string(i);
-                for (int16_t j : string_output) {
-                        program.push_back(j);
-                }
+                std::vector<int16_t> string_output = translate_string(i);
                 str_idx_offsets.insert({num_strings, entry_offset});
                 entry_offset += (int16_t)(string_output.size());
                 num_strings++;
         }
-
+        // Step 2: add entry offset and magic number to beginning of program
+        program.push_back((int16_t)(0x4153)); // SA
+        program.push_back((int16_t)(0x544e)); // NT
+        program.push_back((int16_t)(0x4149)); // IA
+        program.push_back((int16_t)(0x4f47)); // GO
         // ensure 0 element buffer between entry addr and first opcode
-        if (num_strings == 0) {
-                program.push_back((int16_t)(0x0));
+        if (num_strings == 0)
                 entry_offset++;
+        // increase offset for 0xffff after strings get parsed
+        entry_offset++;
+        program.push_back(label_table.at("main") + entry_offset);
+
+        // Step 2.5: add string literal data
+        for (std::string i : tokens) {
+                // skip if not a string
+                if (i.back() != '\"')
+                        continue;
+                i = i.substr(1, i.length() - 2); // strip quotes
+                std::vector<int16_t> string_output = translate_string(i);
+                for (int16_t j : string_output) {
+                        program.push_back(j);
+                }
         }
         // marks end of strings
+        if (num_strings == 0)
+                program.push_back((int16_t)(0x0));
         program.push_back((int16_t)(0xffff));
-        entry_offset++;
-
-        // Step 2: add entry offset and magic number to beginning of program
-        program.push_front(label_table.at("main") + entry_offset);
-        program.push_front((int16_t)(0x4f47)); // GO
-        program.push_front((int16_t)(0x4149)); // IA
-        program.push_front((int16_t)(0x544e)); // NT
-        program.push_front((int16_t)(0x4153)); // SA
 
         // Step 3: translate normal instructions and arguments
         int16_t num_seen_strs = 0;
-        int16_t instruction_idx = 0;
-        while (!tokens.empty()) {
-                std::deque<Atom_Type> curr_blueprint;
-                curr_blueprint = BLUEPRINTS.at(tokens.front());
+        int16_t debug_instruction_idx = 0;
+        size_t token_idx = 0;
+        while (token_idx < tokens.size()) {
+                std::vector<Atom_Type> curr_blueprint;
+                curr_blueprint = BLUEPRINTS.at(tokens.at(token_idx));
                 for (size_t idx = 0; idx < curr_blueprint.size(); ++idx) {
                         bool res = is_valid_key(
-                                tokens.at(idx),
+                                tokens.at(token_idx + idx),
                                 curr_blueprint.at(idx),
                                 program_info
                         );
                         if (!res) {
                                 context.assembler_retval = INVALID_ATOM_2;
-                                context.relevant_idx = instruction_idx;
-                                context.relevant_tokens = {tokens.at(idx)};
+                                context.relevant_idx = debug_instruction_idx;
+                                context.relevant_tokens = {tokens.at(token_idx + idx)};
                                 return context;
                         }
                         int16_t translated = translate_token(
-                                tokens.at(idx),
+                                tokens.at(token_idx + idx),
                                 curr_blueprint.at(idx),
                                 program_info,
                                 num_seen_strs,
@@ -80,9 +90,8 @@ Debug_Info assemble_program(
                         if (curr_blueprint.at(idx) == LITERAL_STR)
                                 num_seen_strs++;
                 }
-                for (size_t idx = 0; idx < curr_blueprint.size(); ++idx)
-                        tokens.pop_front();
-                instruction_idx++;
+                token_idx += curr_blueprint.size();
+                debug_instruction_idx++;
         }
 
         return context;
@@ -108,9 +117,9 @@ bool is_valid_key(std::string token, Atom_Type atom_type, Program_Info program_i
         }
 }
 
-std::deque<int16_t> translate_string(std::string stripped_quote) {
-        std::deque<int16_t> result = {};
-        std::deque<char> intermediate = {};
+std::vector<int16_t> translate_string(std::string stripped_quote) {
+        std::vector<int16_t> result = {};
+        std::vector<char> intermediate = {};
         size_t str_idx = 0;
         while (str_idx < stripped_quote.length()) {
                 char curr = stripped_quote.at(str_idx);

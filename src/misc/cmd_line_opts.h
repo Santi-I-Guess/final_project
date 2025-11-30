@@ -2,7 +2,7 @@
 #define CMD_LINE_OPTS_H 1
 
 #include <cstdint>
-#include <deque>
+#include <vector>
 #include <string>
 #include <map>
 

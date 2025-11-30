@@ -1,5 +1,5 @@
 #include <cstdint>
-#include <deque>
+#include <vector>
 #include <iostream>
 #include <map>
 #include <string>
@@ -8,9 +8,9 @@
 #include "blueprint.h"
 #include "../common_values.h"
 
-std::map<std::string, int16_t> create_label_map(std::deque<std::string> &tokens) {
+std::map<std::string, int16_t> create_label_map(std::vector<std::string> &tokens) {
         std::map<std::string, int16_t> symbols = {};
-        std::deque<std::string> filtered_tokens = {}; // remove label definitions
+        std::vector<std::string> filtered_tokens = {}; // remove label definitions
         size_t program_addr = 0;
         for (std::string curr_token: tokens) {
                 if (curr_token.back() != ':') {
@@ -85,9 +85,9 @@ bool is_valid_i16(std::string token) {
 
 
 
-Debug_Info grammar_check(std::deque<std::string> tokens,
+Debug_Info grammar_check(std::vector<std::string> tokens,
                               std::map<std::string, int16_t> label_table) {
-        // std::deque::pop_front makes std::deque::erase irrelevant
+        // std::vector::pop_front makes std::vector::erase irrelevant
         // (saves on copies)
 
         Debug_Info context;
@@ -110,44 +110,44 @@ Debug_Info grammar_check(std::deque<std::string> tokens,
         }
 
         // map has std::map::find, which makes checking easy
-        int instruction_idx = 0;
-        while (!tokens.empty()) {
+        int debug_instruction_idx = 0;
+        size_t token_idx = 0;
+        while (token_idx < tokens.size()) {
                 // check front token is a known mnemonic
-                if (BLUEPRINTS.find(tokens.front()) == BLUEPRINTS.end()) {
-                        context.relevant_idx = instruction_idx;
-                        context.relevant_tokens = {tokens.front()};
+                if (BLUEPRINTS.find(tokens.at(token_idx)) == BLUEPRINTS.end()) {
+                        context.relevant_idx = debug_instruction_idx;
+                        context.relevant_tokens = {tokens.at(token_idx)};
                         context.grammar_retval = EXPECTED_MNEMONIC;
                         return context;
                 }
-                std::deque<Atom_Type> curr_blueprint;
-                curr_blueprint = BLUEPRINTS.at(tokens.front());
+                std::vector<Atom_Type> curr_blueprint;
+                curr_blueprint = BLUEPRINTS.at(tokens.at(token_idx));
                 curr_blueprint.shrink_to_fit();
                 // check there are enough tokens to warrent argument check
                 if (tokens.size() < curr_blueprint.size()) {
-                        context.relevant_idx = instruction_idx;
-                        context.relevant_tokens = {tokens.front()};
+                        context.relevant_idx = debug_instruction_idx;
+                        context.relevant_tokens = {tokens.at(token_idx)};
                         context.grammar_retval = MISSING_ARGUMENTS;
                         return context;
                 }
                 // check each argument type
                 for (size_t i = 0; i < curr_blueprint.size(); ++i) {
-                        if (!is_valid_atom(curr_blueprint.at(i), tokens.at(i))) {
-                                context.relevant_idx = instruction_idx;
-                                context.relevant_tokens = {tokens.at(0), tokens.at(i)};
+                        if (!is_valid_atom(curr_blueprint.at(i), tokens.at(token_idx + i))) {
+                                context.relevant_idx = debug_instruction_idx;
+                                context.relevant_tokens = {tokens.at(token_idx), tokens.at(token_idx + i)};
                                 context.grammar_retval = INVALID_ATOM;
                                 return context;
                         }
                         bool lbl_chk_1 = curr_blueprint.at(i) == LABEL;
-                        bool lbl_chk_2 = label_table.find(tokens.at(i)) == label_table.end();
+                        bool lbl_chk_2 = label_table.find(tokens.at(token_idx + i)) == label_table.end();
                         if (lbl_chk_1 && lbl_chk_2) {
-                                context.relevant_idx = instruction_idx;
-                                context.relevant_tokens = {tokens.at(0), tokens.at(i)};
+                                context.relevant_idx = debug_instruction_idx;
+                                context.relevant_tokens = {tokens.at(token_idx), tokens.at(token_idx + i)};
                                 context.grammar_retval = UNKNOWN_LABEL;
                         }
                 }
-                for (size_t i = 0; i < curr_blueprint.size(); ++i)
-                        tokens.pop_front();
-                instruction_idx++;
+                token_idx += curr_blueprint.size();
+                debug_instruction_idx++;
         }
         return context;
 }

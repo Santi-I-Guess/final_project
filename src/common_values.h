@@ -1,7 +1,7 @@
 #ifndef COMMON_VALUES_H
 #define COMMON_VALUES_H 1
 
-#include <deque>
+#include <vector>
 #include <string>
 #include <map>
 
@@ -57,7 +57,7 @@ enum Assembler_Retval {
  */
 struct Debug_Info {
         int                     relevant_idx;     ///< any relevant idx
-        std::deque<std::string> relevant_tokens;  ///< any relevant tokens
+        std::vector<std::string> relevant_tokens;  ///< any relevant tokens
         Grammar_Retval          grammar_retval;   ///< blueprint error
         Assembler_Retval        assembler_retval; ///< translation error
 };
@@ -67,7 +67,7 @@ struct Debug_Info {
  * @details as of Tue 18.Nov.2025, this has no applications yet
  */
 struct Program_Info {
-        std::deque<std::string> tokens;             ///< tokens from user program
+        std::vector<std::string> tokens;             ///< tokens from user program
         std::map<std::string, int16_t> label_table; ///< labels from user program
         std::map<int16_t, int16_t> str_idx_offsets; ///< refer to abi.md
 };
@@ -78,7 +78,7 @@ struct Program_Info {
  * so that the inner loop of assemble_program doesn't need to have extra
  * logic for the first argument (i == 0)
  */
-const std::map<std::string, std::deque<Atom_Type>> BLUEPRINTS = {
+const std::map<std::string, std::vector<Atom_Type>> BLUEPRINTS = {
         {"NOP",    {MNEMONIC                          } },
         {"MOV",    {MNEMONIC, REGISTER, SOURCE        } },
         {"INC",    {MNEMONIC, REGISTER                } },

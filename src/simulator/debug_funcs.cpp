@@ -179,7 +179,8 @@ void pdb_handle_print(
                         std::cout << "Cannot access stack with offset outside [0,stack_ptr - 1]\n";
                 } else {
                         std::cout << cmd_tokens.at(1) << " = ";
-                        std::cout << cpu_handle.program_mem[1536 + cpu_handle.stack_ptr - value] << "\n";
+                        // CPU_Handle.see dereference_value
+                        std::cout << cpu_handle.program_mem[1536 + cpu_handle.stack_ptr - value - 1] << "\n";
                 }
         } else if (cmd_tokens.at(1).at(0) == 'M') {
                 // mem address: expect MEM[num]

@@ -1,7 +1,7 @@
 #ifndef FILE_HANDLING_H
 #define FILE_HANDLING_H 1
 
-#include <deque>
+#include <vector>
 #include <map>
 #include <string>
 #include <fstream>
@@ -11,7 +11,7 @@
  * @details wrapper function of write_tokens_to_sink and write_labels_to_sink
  */
 void generate_intermediates(std::string file_header,
-                            std::deque<std::string> tokens,
+                            std::vector<std::string> tokens,
                             std::map<std::string, int16_t> label_table);
 
 /**
@@ -24,7 +24,7 @@ std::string get_source_buffer(std::string source_path, bool use_stdin);
  * @brief populates final program from input if -b flag is given
  */
 void populate_program_from_binary(
-        std::deque<int16_t> &program,
+        std::vector<int16_t> &program,
         std::string filepath
 );
 
@@ -39,11 +39,11 @@ bool write_labels_to_sink(
 /**
  * @brief writes intermediate file for assembled progra
  */
-bool write_program_to_sink(std::deque<int16_t> program, std::string header);
+bool write_program_to_sink(std::vector<int16_t> program, std::string header);
 
 /**
  * @brief writes intermediate file for token
  */
-bool write_tokens_to_sink(std::deque<std::string> tokens, std::string header);
+bool write_tokens_to_sink(std::vector<std::string> tokens, std::string header);
 
 #endif

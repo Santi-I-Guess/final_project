@@ -1,13 +1,13 @@
 #include <cctype>
 #include <cstdint>
 #include <cstddef>
-#include <deque>
+#include <vector>
 #include <string>
 
 #include "tokenizer.h"
 
-std::deque<std::string> create_tokens(const std::string source_buffer) {
-        std::deque<std::string> tokens = {};
+std::vector<std::string> create_tokens(const std::string source_buffer) {
+        std::vector<std::string> tokens = {};
         size_t buff_idx = 0;
         size_t buff_len = source_buffer.length();
         while (buff_idx < buff_len) {

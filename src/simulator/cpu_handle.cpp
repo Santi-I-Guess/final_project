@@ -1,7 +1,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <deque>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -87,7 +86,7 @@ int16_t CPU_Handle::dereference_value(int16_t given_value) {
         return intended_value;
 }
 
-void CPU_Handle::load_program(const std::deque<int16_t> given_program) {
+void CPU_Handle::load_program(const std::vector<int16_t> given_program) {
         if (!program_data) {
                 program_data = new int16_t[given_program.size()];
                 if (!program_data) {
@@ -208,7 +207,7 @@ void CPU_Handle::run_program_debug() {
                 mnemonic_addrs.push_back(temp_idx);
                 int16_t curr = program_data[temp_idx];
                 std::string mnemonic_str = DEREFERENCE_TABLE[curr];
-                std::deque<Atom_Type> curr_blueprint = BLUEPRINTS.at(mnemonic_str);
+                std::vector<Atom_Type> curr_blueprint = BLUEPRINTS.at(mnemonic_str);
                 temp_idx += (int16_t)curr_blueprint.size();
         }
 

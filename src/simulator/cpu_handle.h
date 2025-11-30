@@ -2,11 +2,9 @@
 #define CPU_HANDLE_H 1
 
 #include <cstdint>
-#include <deque>
 #include <map>
 #include <string>
 #include <vector>
-
 
 const std::string error_messages[6] = {
         "attemped to mutate immutable destination",
@@ -56,7 +54,7 @@ public:
         CPU_Handle();
         ~CPU_Handle();
         int16_t dereference_value(int16_t given_value);
-        void load_program(const std::deque<int16_t> given_program);
+        void load_program(const std::vector<int16_t> given_program);
         void next_instruction(bool &hit_exit);
         void run_program();
         void run_program_debug();
@@ -114,7 +112,7 @@ public:
 };
 
 /**
- * @fn void CPU_Handle::load_program(const std::deque<int16_t> given_program)
+ * @fn void CPU_Handle::load_program(const std::vector<int16_t> given_program)
  * @brief loads elements of given_program to program_data
  * @details also allocates program_data member to have enough space to load
  * given_data, since string data may be large

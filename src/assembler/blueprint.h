@@ -1,4 +1,4 @@
-#include <deque>
+#include <vector>
 #include <map>
 #include <string>
 
@@ -12,7 +12,7 @@
  * @brief obtains the addresses of user defined labels, and filters labels
  * out of the tokens paramenter
  */
-std::map<std::string, int16_t> create_label_map(std::deque<std::string> &tokens);
+std::map<std::string, int16_t> create_label_map(std::vector<std::string> &tokens);
 
 
 /**
@@ -33,7 +33,7 @@ bool is_valid_i16(std::string token);
  * missing EXIT program, missing main label, or calling an undefined label
  */
 Debug_Info grammar_check(
-        std::deque<std::string> tokens,
+        std::vector<std::string> tokens,
         std::map<std::string, int16_t> label_table
 );
 

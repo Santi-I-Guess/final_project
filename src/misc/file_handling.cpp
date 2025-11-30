@@ -1,5 +1,5 @@
 #include <cstdlib>
-#include <deque>
+#include <vector>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -9,7 +9,7 @@
 #include "file_handling.h"
 
 void generate_intermediates(std::string file_header,
-                            std::deque<std::string> tokens,
+                            std::vector<std::string> tokens,
                             std::map<std::string, int16_t> label_table) {
         bool res_temp;
         res_temp = write_tokens_to_sink(tokens, file_header);
@@ -50,7 +50,7 @@ std::string get_source_buffer(std::string source_path, bool use_stdin) {
 }
 
 void populate_program_from_binary(
-        std::deque<int16_t> &program,
+        std::vector<int16_t> &program,
         std::string file_path
 ) {
         std::ifstream source_bin(file_path, std::ios::binary);
@@ -96,7 +96,7 @@ bool write_labels_to_sink(
         return true;
 }
 
-bool write_program_to_sink(std::deque<int16_t> program, std::string header) {
+bool write_program_to_sink(std::vector<int16_t> program, std::string header) {
         std::string file_path = "program_" + header + ".bin";
         std::ofstream sink_file(file_path, std::ios::binary);
         if (sink_file.fail())
@@ -107,7 +107,7 @@ bool write_program_to_sink(std::deque<int16_t> program, std::string header) {
         return true;
 }
 
-bool write_tokens_to_sink(std::deque<std::string> tokens, std::string header) {
+bool write_tokens_to_sink(std::vector<std::string> tokens, std::string header) {
         std::ofstream sink_file("intermediate_tokens_" + header + ".txt");
         if (sink_file.fail())
                 return false;

@@ -7,7 +7,7 @@
  * Also hosted at https://github.com/Santi-I-Guess/final_project
  */
 
-#include <deque>
+#include <vector>
 #include <iostream>
 #include <random>
 #include <string>
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
         // put assembled program here, so that assembler.h doesn't require
         // cpu_handle
-        std::deque<int16_t> final_program = {};
+        std::vector<int16_t> final_program = {};
 
         if (life_opts.is_binary_input) {
                 std::string bin_source_path = argv[life_opts.input_file_idx];
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
                 // Step 1: tokenize and define labels
                 // label_table also removes label definitions from tokens
-                std::deque<std::string> tokens = create_tokens(source_buffer);
+                std::vector<std::string> tokens = create_tokens(source_buffer);
                 std::map<std::string, int16_t> label_table = create_label_map(tokens);
                 if (life_opts.intermediate_files)
                         generate_intermediates(file_header, tokens, label_table);
