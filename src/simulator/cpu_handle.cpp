@@ -39,29 +39,31 @@ CPU_Handle::~CPU_Handle() {
         prog_size = 0;
 }
 
-int16_t CPU_Handle::dereference_value(int16_t given_value) {
+int16_t CPU_Handle::dereference_value(const int16_t given_value) {
+        int16_t intended_address = 0;
         int16_t intended_value = 0;
         if ((given_value >> 14) & 1) {
                 // literal value
-                if (given_value >= 0)
-                        given_value ^= (int16_t)(1 << 14);
                 intended_value = given_value;
+                if (intended_value >= 0)
+                        intended_value ^= (int16_t)(1 << 14);
         } else if ((given_value >> 13) & 1) {
                 // stack offest
                 // stack[0] starts at program_mem[1536]
-                given_value ^= (int16_t)(1 << 13);
-                if (given_value > stack_ptr) {
+                intended_address = given_value;
+                intended_address ^= (int16_t)(1 << 13);
+                if (intended_address > stack_ptr) {
                         std::cout << "Error: " << error_messages[1];
                         std::cout << "\n";
                         std::exit(1);
                 }
                 // -1, because stack_ptr points to memory of next element,
                 // not top element
-                intended_value = program_mem[1536 + stack_ptr - given_value - 1];
+                intended_value = program_mem[1536 + stack_ptr - intended_address - 1];
         } else if ((given_value >> 12) & 1) {
                 // string literal
-                given_value ^= (int16_t)(1 << 12);
                 intended_value = given_value;
+                intended_value ^= (int16_t)(1 << 12);
         } else {
                 // register idx
                 switch (given_value) {

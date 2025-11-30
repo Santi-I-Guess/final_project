@@ -97,8 +97,12 @@ Debug_Info assemble_program(
         return context;
 }
 
-bool is_valid_key(std::string token, Atom_Type atom_type, Program_Info program_info) {
-        std::map<std::string, int16_t> &label_table = program_info.label_table;
+bool is_valid_key(
+        const std::string token,
+        const Atom_Type atom_type,
+        const Program_Info program_info
+) {
+        const std::map<std::string, int16_t> &label_table = program_info.label_table;
 
         switch (atom_type) {
         case LABEL:
@@ -117,7 +121,7 @@ bool is_valid_key(std::string token, Atom_Type atom_type, Program_Info program_i
         }
 }
 
-std::vector<int16_t> translate_string(std::string stripped_quote) {
+std::vector<int16_t> translate_string(const std::string stripped_quote) {
         std::vector<int16_t> result = {};
         std::vector<char> intermediate = {};
         size_t str_idx = 0;
@@ -155,19 +159,24 @@ std::vector<int16_t> translate_string(std::string stripped_quote) {
         return result;
 }
 
-int16_t translate_token(std::string token, Atom_Type atom_type,
-                        Program_Info program_info, int16_t num_seen_strs,
-                        int16_t entry_offset) {
+int16_t translate_token(
+        const std::string token,
+        const Atom_Type atom_type,
+        const Program_Info program_info,
+        const int16_t num_seen_strs,
+        const int16_t entry_offset
+) {
         std::map<int16_t, int16_t> str_idx_offsets = program_info.str_idx_offsets;
         std::map<std::string, int16_t> label_table = program_info.label_table;
         std::stringstream aux_stream;
         int16_t aux_int;
+        std::string stripped_token;
         switch (atom_type) {
         case LABEL:
                 return label_table.at(token) + entry_offset;
         case LITERAL_INT:
-                token = token.substr(1, token.length() - 1);
-                aux_stream << token;
+                stripped_token = token.substr(1, token.length() - 1);
+                aux_stream << stripped_token;
                 aux_stream >> aux_int;
                 aux_int |= (int16_t)(1 << 14); // bitmask
                 return aux_int;
@@ -186,8 +195,8 @@ int16_t translate_token(std::string token, Atom_Type atom_type,
                 else
                         return translate_token(token, STACK_OFFSET, program_info, num_seen_strs, entry_offset);
         case STACK_OFFSET:
-                token = token.substr(1, token.length() - 1);
-                aux_stream << token;
+                stripped_token = token.substr(1, token.length() - 1);
+                aux_stream << stripped_token;
                 aux_stream >> aux_int;
                 aux_int |= (int16_t)(1 << 13); // bitmask
                 return aux_int;

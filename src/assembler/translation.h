@@ -20,29 +20,27 @@ Debug_Info assemble_program(
  * @details helper function of assemble_program
  */
 bool is_valid_key(
-        std::string token,
-        Atom_Type atom_type,
-        Program_Info program_info
+        const std::string token,
+        const Atom_Type atom_type,
+        const Program_Info program_info
 );
 
 /**
  * @brief translates a single string into series of int16_t's with a null int16_t
  * @details helper function of assemble_program
  */
-std::vector<int16_t> translate_string(
-        std::string stripped_token
-);
+std::vector<int16_t> translate_string(const std::string stripped_token);
 
 /**
  * @brief translates a single token into an int16_t
  * @details helper function of assemble_program
  */
 int16_t translate_token(
-        std::string token,
-        Atom_Type atom_type,
-        Program_Info program_info,
-        int16_t num_seen_strs,
-        int16_t entry_offset
+        const std::string token,
+        const Atom_Type atom_type,
+        const Program_Info program_info,
+        const int16_t num_seen_strs,
+        const int16_t entry_offset
 );
 
 #endif

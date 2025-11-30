@@ -8,9 +8,11 @@
 
 #include "file_handling.h"
 
-void generate_intermediates(std::string file_header,
-                            std::vector<std::string> tokens,
-                            std::map<std::string, int16_t> label_table) {
+void generate_intermediates(
+        const std::string file_header,
+        const std::vector<std::string> tokens,
+        const std::map<std::string, int16_t> label_table
+) {
         bool res_temp;
         res_temp = write_tokens_to_sink(tokens, file_header);
         if (!res_temp) {
@@ -24,7 +26,10 @@ void generate_intermediates(std::string file_header,
         }
 }
 
-std::string get_source_buffer(std::string source_path, bool use_stdin) {
+std::string get_source_buffer(
+        const std::string source_path,
+        const bool use_stdin
+) {
         std::string source_buffer = "";
         if (use_stdin) {
                 std::string aux_string = "";
@@ -51,7 +56,7 @@ std::string get_source_buffer(std::string source_path, bool use_stdin) {
 
 void populate_program_from_binary(
         std::vector<int16_t> &program,
-        std::string file_path
+        const std::string file_path
 ) {
         std::ifstream source_bin(file_path, std::ios::binary);
         if (source_bin.fail()) {
@@ -71,23 +76,23 @@ void populate_program_from_binary(
 }
 
 bool write_labels_to_sink(
-        std::map<std::string, int16_t> label_table,
-        std::string header
+        const std::map<std::string, int16_t> label_table,
+        const std::string header
 ) {
         std::ofstream sink_file("intermediate_labels_" + header + ".txt");
         if (sink_file.fail()) {
                 return false;
         }
-        std::map<std::string, int16_t>::iterator it;
+        std::map<std::string, int16_t>::const_iterator it;
         size_t max_label_size = 0;
         // get formatting sizes
-        for (it = label_table.begin(); it != label_table.end(); ++it) {
+        for (it = label_table.cbegin(); it != label_table.cend(); ++it) {
                 size_t label_len = (it->first).length();
                 if (label_len > max_label_size)
                         max_label_size = label_len;
         }
         // print
-        for (it = label_table.begin(); it != label_table.end(); ++it) {
+        for (it = label_table.cbegin(); it != label_table.cend(); ++it) {
                 sink_file << std::left << std::setw((int)max_label_size);
                 sink_file << (it->first) << " = ";
                 sink_file << (it->second) << "\n";
@@ -96,7 +101,10 @@ bool write_labels_to_sink(
         return true;
 }
 
-bool write_program_to_sink(std::vector<int16_t> program, std::string header) {
+bool write_program_to_sink(
+        const std::vector<int16_t> program,
+        const std::string header
+) {
         std::string file_path = "program_" + header + ".bin";
         std::ofstream sink_file(file_path, std::ios::binary);
         if (sink_file.fail())
@@ -107,7 +115,10 @@ bool write_program_to_sink(std::vector<int16_t> program, std::string header) {
         return true;
 }
 
-bool write_tokens_to_sink(std::vector<std::string> tokens, std::string header) {
+bool write_tokens_to_sink(
+        const std::vector<std::string> tokens,
+        const std::string header
+) {
         std::ofstream sink_file("intermediate_tokens_" + header + ".txt");
         if (sink_file.fail())
                 return false;

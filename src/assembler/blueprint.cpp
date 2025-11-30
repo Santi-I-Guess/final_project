@@ -5,8 +5,8 @@
 #include <string>
 #include <sstream>
 
-#include "blueprint.h"
 #include "../common_values.h"
+#include "blueprint.h"
 
 std::map<std::string, int16_t> create_label_map(std::vector<std::string> &tokens) {
         std::map<std::string, int16_t> symbols = {};
@@ -33,8 +33,9 @@ std::map<std::string, int16_t> create_label_map(std::vector<std::string> &tokens
         return symbols;
 }
 
-bool is_valid_atom(Atom_Type atom_type, std::string token) {
+bool is_valid_atom(const Atom_Type atom_type, const std::string token) {
         bool first, second;
+        std::string stripped_token;
         switch (atom_type) {
         case LABEL:
                 // easier to check in later function call
@@ -42,8 +43,8 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
         case LITERAL_INT:
                 if (token.front() != '$')
                         return false;
-                token = token.substr(1, token.length() - 1);
-                return is_valid_i16(token);
+                stripped_token = token.substr(1, token.length() - 1);
+                return is_valid_i16(stripped_token);
         case LITERAL_STR:
                 first = token.front() == token.back();
                 second = token.front() == '\"';
@@ -64,16 +65,16 @@ bool is_valid_atom(Atom_Type atom_type, std::string token) {
         case STACK_OFFSET:
                 if (token.front() != '%')
                         return false;
-                token = token.substr(1, token.length() - 1);
-                return is_valid_i16(token);
+                stripped_token = token.substr(1, token.length() - 1);
+                return is_valid_i16(stripped_token);
         }
         return true;
 }
 
-bool is_valid_i16(std::string token) {
+bool is_valid_i16(const std::string token) {
         std::stringstream the_stream(token);
         int32_t value = 0;
-        the_stream >> token;
+        the_stream >> value;
         if (the_stream.fail())
                 return false;
         if (value > (int32_t)INT16_MAX)
@@ -85,8 +86,10 @@ bool is_valid_i16(std::string token) {
 
 
 
-Debug_Info grammar_check(std::vector<std::string> tokens,
-                              std::map<std::string, int16_t> label_table) {
+Debug_Info grammar_check(
+        const std::vector<std::string> tokens,
+        const std::map<std::string, int16_t> label_table
+) {
         // std::vector::pop_front makes std::vector::erase irrelevant
         // (saves on copies)
 

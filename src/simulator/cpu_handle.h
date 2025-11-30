@@ -53,7 +53,7 @@ public:
         int16_t prog_size; /** size of program data */
         CPU_Handle();
         ~CPU_Handle();
-        int16_t dereference_value(int16_t given_value);
+        int16_t dereference_value(const int16_t given_value);
         void load_program(const std::vector<int16_t> given_program);
         void next_instruction(bool &hit_exit);
         void run_program();
@@ -106,8 +106,8 @@ public:
         );
         friend void update_register(
                 CPU_Handle &cpu_handle,
-                int16_t dest,
-                int16_t value
+                const int16_t dest,
+                const int16_t value
         );
 };
 

@@ -441,7 +441,11 @@ void ins_exit(CPU_Handle &cpu_handle) {
         prog_ctr += INSTRUCTION_LENS[30];
 }
 
-void update_register(CPU_Handle &cpu_handle, int16_t dest, int16_t value) {
+void update_register(
+        CPU_Handle &cpu_handle,
+        const int16_t dest,
+        const int16_t value)
+{
         if (dest < 0 || dest > 7) {
                 std::cout << "Error: " << error_messages[0] << "\n";
                 std::exit(1);

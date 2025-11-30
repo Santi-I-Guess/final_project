@@ -18,7 +18,7 @@ struct Cmd_Options {
         bool is_debug;         ///< -d
 
         Cmd_Options();
-        bool handle_cmd_args(int argc, char **argv); ///< stores flags
+        bool handle_cmd_args(const int argc, char ** const argv); ///< stores flags
 };
 
 

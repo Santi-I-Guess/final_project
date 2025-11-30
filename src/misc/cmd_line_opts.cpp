@@ -14,7 +14,7 @@ Cmd_Options::Cmd_Options() {
 
 /* auxiliary function to handle command line arguments
  misc: doesn't rust's cargo have a package for cmd parsing? */
-bool Cmd_Options::handle_cmd_args(int argc, char **argv) {
+bool Cmd_Options::handle_cmd_args(const int argc, char ** const argv) {
         if (argc < 2)
                 return true;
         for (int i = 1; i < argc; ++i) {
