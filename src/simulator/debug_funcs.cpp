@@ -2,10 +2,69 @@
 #include <iostream>
 
 #include "debug_funcs.h"
+#include "cpu_handle.h"
 #include "../common_values.h"
 
 #define BOLD "\x1b[1m"
 #define CLEAR "\x1b[0m"
+
+void pdb_handle_delete(
+        const std::vector<std::string> cmd_tokens,
+        std::vector<int16_t> &breakpoints
+) {
+        if (cmd_tokens.size() != 2) {
+                // delete all breakpoints
+                breakpoints.clear();
+                std::cout << "all breakpoints deleted\n";
+                return;
+        }
+        // remove address from breakpoints
+        int16_t condemned = (int16_t)std::stoi(cmd_tokens.at(1));
+        for (size_t i = 0; i < breakpoints.size(); ++i) {
+                if (breakpoints[i] == condemned) {
+                        breakpoints.erase(breakpoints.begin() + i);
+                        break;
+                }
+        }
+}
+
+void pdb_handle_print(
+        const std::vector<std::string> cmd_tokens,
+        CPU_Handle &cpu_handle
+) {
+        if (cmd_tokens.size() != 2) {
+                std::cout << "no arguments provided\n";
+                return;
+        }
+
+        if (cmd_tokens.at(1) == "RA") {
+                std::cout << "RA = " << cpu_handle.reg_a << "\n";
+        } else if (cmd_tokens.at(1) == "RB") {
+                std::cout << "RB = " << cpu_handle.reg_b << "\n";
+        } else if (cmd_tokens.at(1) == "RC") {
+                std::cout << "RC = " << cpu_handle.reg_c << "\n";
+        } else if (cmd_tokens.at(1) == "RD") {
+                std::cout << "RD = " << cpu_handle.reg_d << "\n";
+        } else if (cmd_tokens.at(1) == "RE") {
+                std::cout << "RE = " << cpu_handle.reg_e << "\n";
+        } else if (cmd_tokens.at(1) == "RF") {
+                std::cout << "RF = " << cpu_handle.reg_f << "\n";
+        } else if (cmd_tokens.at(1) == "RG") {
+                std::cout << "RG = " << cpu_handle.reg_g << "\n";
+        } else if (cmd_tokens.at(1) == "RH") {
+                std::cout << "RH = " << cpu_handle.reg_h << "\n";
+        } else if (cmd_tokens.at(1) == "CMP1") {
+                std::cout << "RH = " << cpu_handle.reg_cmp_a << "\n";
+        } else if (cmd_tokens.at(1) == "CMP2") {
+                std::cout << "RH = " << cpu_handle.reg_cmp_b << "\n";
+        } else if (cmd_tokens.at(1) == "RSP") {
+                std::cout << "RSP = " << cpu_handle.stack_ptr << "\n";
+        } else if (cmd_tokens.at(1) == "RIP") {
+                std::cout << "RIP = " << cpu_handle.prog_ctr << "\n";
+        } else {
+                std::cout << "unrecognized value\n";
+        }
+}
 
 void print_chars(
         int16_t curr,
@@ -89,17 +148,19 @@ void print_instruction(
                         arg_stream << "%";
                         arg_stream << curr_arg;
                 } else if ((curr_arg >> 12) & 1) {
+                        // string literal
                         curr_arg ^= (int16_t)(1 << 12);
                         arg_stream << "#";
                         arg_stream << curr_arg;
                 } else if ((arg_type == REGISTER) || (arg_type == SOURCE)) {
+                        // register idx
                         arg_stream << "R";
                         arg_stream << (char)('A' + curr_arg);
                 } else {
-                        arg_stream << "?";
+                        // label
+                        arg_stream << "@";
                         arg_stream << curr_arg;
                 }
-
                 arg_string = arg_stream.str();
                 out_stream << std::right << std::setw(8) << arg_string;
         }
@@ -204,6 +265,7 @@ void print_instruction_simple(int16_t *program_data, int16_t prog_ctr) {
         // first, the mnemoinc
         int16_t curr = program_data[prog_ctr];
         std::string mnem_name = DEREFERENCE_TABLE[curr];
+        out_stream << "#" << std::right << std::setw(4) << prog_ctr << ": ";
         out_stream << std::left << std::setw(7) << mnem_name;
 
         // second, the arguments
@@ -225,14 +287,17 @@ void print_instruction_simple(int16_t *program_data, int16_t prog_ctr) {
                         arg_stream << "%";
                         arg_stream << curr_arg;
                 } else if ((curr_arg >> 12) & 1) {
+                        // string literal
                         curr_arg ^= (int16_t)(1 << 12);
                         arg_stream << "#";
                         arg_stream << curr_arg;
                 } else if ((arg_type == REGISTER) || (arg_type == SOURCE)) {
+                        // register idx
                         arg_stream << "R";
                         arg_stream << (char)('A' + curr_arg);
                 } else {
-                        arg_stream << "?";
+                        // label
+                        arg_stream << "#";
                         arg_stream << curr_arg;
                 }
                 arg_string = arg_stream.str();

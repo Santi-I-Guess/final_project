@@ -5,6 +5,7 @@
 #include <deque>
 #include <map>
 #include <string>
+#include <vector>
 
 
 const std::string error_messages[6] = {
@@ -54,11 +55,11 @@ public:
         int16_t prog_size; /** size of program data */
         CPU_Handle();
         ~CPU_Handle();
+        int16_t dereference_value(int16_t given_value);
         void load_program(const std::deque<int16_t> given_program);
+        void next_instruction(bool &hit_exit);
         void run_program();
         void run_program_debug();
-        void next_instruction(bool &hit_exit);
-        int16_t dereference_value(int16_t given_value);
 
         // needs access to private members, but won't be member method for reasons
         friend void ins_nop(CPU_Handle &cpu_handle);
@@ -92,6 +93,15 @@ public:
         friend void ins_print(CPU_Handle &cpu_handle);
         friend void ins_sprint(CPU_Handle &cpu_handle);
         friend void ins_exit(CPU_Handle &cpu_handle);
+
+        friend void pdb_handle_delete(
+                const std::vector<std::string> cmd_tokens,
+                std::vector<int16_t> &breakpoints
+        );
+        friend void pdb_handle_print(
+                const std::vector<std::string> cmd_tokens,
+                CPU_Handle &cpu_handle
+        );
 };
 
 /**

@@ -5,6 +5,16 @@
 
 // series of functions to be used when -d flag is on
 
+void pdb_handle_delete(
+        const std::vector<std::string> cmd_tokens,
+        std::vector<int16_t> &breakpoints
+);
+
+void pdb_handle_print(
+        const std::vector<std::string> cmd_tokens,
+        CPU_Handle &cpu_handle
+);
+
 /**
  * @brief print interpretation of assembled program, along with addresses
  * @details debugging only function: mostly used for branching instruction

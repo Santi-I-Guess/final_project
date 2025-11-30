@@ -10,6 +10,7 @@
 #include "../common_values.h"
 #include "cpu_handle.h"
 #include "debug_funcs.h"
+#include "instructions.h"
 
 CPU_Handle::CPU_Handle() {
         reg_a = 0;
@@ -101,193 +102,6 @@ void CPU_Handle::load_program(const std::deque<int16_t> given_program) {
         prog_size = given_size;
 }
 
-
-void CPU_Handle::run_program() {
-        bool hit_exit = false;
-        if (prog_ctr == 0)
-                prog_ctr = program_data[4];
-
-        while (!hit_exit) {
-                next_instruction(hit_exit);
-        }
-}
-
-void CPU_Handle::run_program_debug() {
-        int16_t num_instructions_left = 0;
-        bool hit_exit = false;
-        bool continue_cond = false;
-        std::vector<int16_t> breakpoints = {};
-
-        // to ensure all breakpoints are valid addresses
-        std::vector<int16_t> mnemonic_addrs = {};
-        int16_t temp_idx = 0;
-        while ((program_data[temp_idx - 1] != (int16_t)0xffff) && (temp_idx < prog_size))
-                temp_idx++;
-        while (temp_idx < prog_size) {
-                mnemonic_addrs.push_back(temp_idx);
-                int16_t curr = program_data[temp_idx];
-                std::string mnemonic_str = DEREFERENCE_TABLE[curr];
-                std::deque<Atom_Type> curr_blueprint = BLUEPRINTS.at(mnemonic_str);
-                temp_idx += (int16_t)curr_blueprint.size();
-        }
-
-        std::cout << "PAL Debugger (PalDB)\n";
-        std::cout << "For help, type \"help\"\n\n";
-
-        // pause when no more instructions
-        while (!hit_exit) {
-                std::cout << "(PalDB) > ";
-                std::string command;
-                std::getline(std::cin, command);
-
-                // tokenize command
-                std::vector<std::string> cmd_tokens;
-                std::string aux_string = "";
-                std::stringstream aux_stream(command);
-                while (aux_stream >> aux_string) {
-                        cmd_tokens.push_back(aux_string);
-                }
-                if (cmd_tokens.size() == 0)
-                        continue;
-
-                // begin parsing
-                if (cmd_tokens.front()[0] == 'b') {
-                        // break
-                        if (cmd_tokens.size() != 2) {
-                                std::cout << "argument required\n";
-                                continue;
-                        }
-                        // check for 2nd argumenteak funname
-                        // check 2nd argument is valid offset
-                        int16_t awaiting = (int16_t)std::stoi(cmd_tokens.at(1));
-                        bool is_valid = false;
-                        for (int16_t address : mnemonic_addrs) {
-                                if (awaiting == address) {
-                                        is_valid = true;
-                                        break;
-                                }
-                        }
-
-                        if (is_valid) {
-                                breakpoints.push_back(awaiting);
-                                std::cout << "added " << awaiting << "\n";
-                        } else {
-                                std::cout << awaiting << " is not a valid breakpoint\n";
-                        }
-                } else if (cmd_tokens.front() == "clear") {
-                        system("clear");
-                } else if (cmd_tokens.front() == "continue") {
-                        continue_cond = true;
-                } else if (cmd_tokens.front()[0] == 'd') {
-                        // delete
-                        if (cmd_tokens.size() != 2) {
-                                // delete all breakpoints
-                                breakpoints.clear();
-                                std::cout << "all breakpoints deleted\n";
-                        } else {
-                                // remove address from breakpoints
-                                int16_t condemned = (int16_t)std::stoi(cmd_tokens.at(1));
-                                for (size_t i = 0; i < breakpoints.size(); ++i) {
-                                        if (breakpoints[i] == condemned) {
-                                                breakpoints.erase(breakpoints.begin() + i);
-                                                break;
-                                        }
-                                }
-                        }
-                        // check for 2nd argument
-                        // check 2nd argument is valid offset
-                } else if (cmd_tokens.front()[0] == 'h') {
-                        // help
-                        print_pdb_help();
-                } else if (cmd_tokens.front()[0] == 'i') {
-                        // interpret
-                        interpret_program(*this);
-                } else if (cmd_tokens.front()[0] == 'l') {
-                        // next instruction to run
-                        if (prog_ctr == 0)
-                                print_instruction_simple(program_data, program_data[4]);
-                        else
-                                print_instruction_simple(program_data, prog_ctr);
-                } else if (cmd_tokens.front()[0] == 'n') {
-                        // next
-                        if (cmd_tokens.size() == 2) {
-                                // allow 1+ steps
-                                int16_t num_steps = (int16_t)std::stoi(cmd_tokens.at(1));
-                                num_steps = (num_steps >= 1) ? num_steps : 1;
-                                num_instructions_left = num_steps;
-                        } else {
-                                num_instructions_left = 1;
-                        }
-
-                        // next
-                } else if (cmd_tokens.front()[0] == 'p') {
-                        if (cmd_tokens.size() != 2) {
-                                std::cout << "no arguments provided\n";
-                                continue;
-                        }
-
-                        if (cmd_tokens.at(1) == "RA") {
-                                std::cout << "RA = " << reg_a << "\n";
-                        } else if (cmd_tokens.at(1) == "RB") {
-                                std::cout << "RB = "<< reg_b << "\n";
-                        } else if (cmd_tokens.at(1) == "RC") {
-                                std::cout << "RC = "<< reg_c << "\n";
-                        } else if (cmd_tokens.at(1) == "RD") {
-                                std::cout << "RD = "<< reg_d << "\n";
-                        } else if (cmd_tokens.at(1) == "RE") {
-                                std::cout << "RE = "<< reg_e << "\n";
-                        } else if (cmd_tokens.at(1) == "RF") {
-                                std::cout << "RF = "<< reg_f << "\n";
-                        } else if (cmd_tokens.at(1) == "RG") {
-                                std::cout << "RG = "<< reg_g << "\n";
-                        } else if (cmd_tokens.at(1) == "RH") {
-                                std::cout << "RH = "<< reg_h << "\n";
-                        } else if (cmd_tokens.at(1) == "CMP1") {
-                                std::cout << "RH = "<< reg_cmp_a << "\n";
-                        } else if (cmd_tokens.at(1) == "CMP2") {
-                                std::cout << "RH = "<< reg_cmp_b << "\n";
-                        } else if (cmd_tokens.at(1) == "RSP") {
-                                std::cout << "RSP = "<< stack_ptr << "\n";
-                        } else if (cmd_tokens.at(1) == "RIP") {
-                                std::cout << "RIP = "<< prog_ctr << "\n";
-                        } else {
-                                std::cout << "unrecognized value\n";
-                        }
-
-                        // print
-                        // check for 2nd argument
-                } else if (cmd_tokens.front()[0] == 'q') {
-                        // quit
-                        break;
-                } else {
-                        std::cout << "unrecognized command\n";
-                }
-
-                bool previously_ran = false;
-                while (!hit_exit && (num_instructions_left > 0 || continue_cond)) {
-                        // run_instructions
-                        for (int16_t address : breakpoints) {
-                                if (prog_ctr == address) {
-                                        continue_cond = false;
-                                        num_instructions_left = 0;
-                                }
-                        }
-                        next_instruction(hit_exit);
-                        num_instructions_left--;
-                        previously_ran = true;
-                }
-
-                if (!hit_exit && previously_ran) {
-                        // print next instruction to run
-                        if (prog_ctr == 0)
-                                print_instruction_simple(program_data, program_data[4]);
-                        else
-                                print_instruction_simple(program_data, prog_ctr);
-                        previously_ran = false;
-                }
-        }
-}
-
 void CPU_Handle::next_instruction(bool &hit_exit) {
 
         // if program just started
@@ -367,3 +181,142 @@ void CPU_Handle::next_instruction(bool &hit_exit) {
                 hit_exit = true;
         }
 }
+
+void CPU_Handle::run_program() {
+        bool hit_exit = false;
+        if (prog_ctr == 0)
+                prog_ctr = program_data[4];
+
+        while (!hit_exit) {
+                next_instruction(hit_exit);
+        }
+}
+
+void CPU_Handle::run_program_debug() {
+        int16_t num_instructions_left = 0;
+        bool hit_exit = false;
+        bool continue_cond = false;
+        std::vector<int16_t> breakpoints = {};
+        std::vector<int16_t> mnemonic_addrs = {};
+
+        // to ensure all breakpoints are valid addresses
+        int16_t temp_idx = 0;
+        while ((program_data[temp_idx - 1] != (int16_t)0xffff) && (temp_idx < prog_size))
+                temp_idx++;
+        while (temp_idx < prog_size) {
+                mnemonic_addrs.push_back(temp_idx);
+                int16_t curr = program_data[temp_idx];
+                std::string mnemonic_str = DEREFERENCE_TABLE[curr];
+                std::deque<Atom_Type> curr_blueprint = BLUEPRINTS.at(mnemonic_str);
+                temp_idx += (int16_t)curr_blueprint.size();
+        }
+
+        std::cout << "PAL Debugger (PalDB)\n";
+        std::cout << "For help, type \"help\"\n\n";
+
+        prog_ctr = program_data[4];
+
+        // pause when no more instructions
+        while (!hit_exit) {
+                std::cout << "(PalDB) > ";
+                std::string command;
+                std::getline(std::cin, command);
+
+                // tokenize command
+                std::vector<std::string> cmd_tokens;
+                std::string aux_string = "";
+                std::stringstream aux_stream(command);
+                while (aux_stream >> aux_string) {
+                        cmd_tokens.push_back(aux_string);
+                }
+                // ignore, if no commands
+                if (cmd_tokens.size() == 0)
+                        continue;
+
+                // begin parsing
+                if (cmd_tokens.front()[0] == 'b') {
+                        // break
+                        if (cmd_tokens.size() != 2) {
+                                std::cout << "argument required\n";
+                                continue;
+                        }
+                        // check for 2nd argumenteak funname
+                        // check 2nd argument is valid offset
+                        int16_t awaiting = (int16_t)std::stoi(cmd_tokens.at(1));
+                        bool is_valid = false;
+                        for (int16_t address : mnemonic_addrs) {
+                                if (awaiting == address) {
+                                        is_valid = true;
+                                        break;
+                                }
+                        }
+
+                        if (is_valid) {
+                                breakpoints.push_back(awaiting);
+                                std::cout << "added " << awaiting << "\n";
+                        } else {
+                                std::cout << awaiting << " is not a valid breakpoint\n";
+                        }
+                } else if (cmd_tokens.front() == "clear") {
+                        system("clear");
+                } else if (cmd_tokens.front() == "continue") {
+                        continue_cond = true;
+                } else if (cmd_tokens.front()[0] == 'd') {
+                        // delete
+                        pdb_handle_delete(cmd_tokens, breakpoints);
+                } else if (cmd_tokens.front()[0] == 'h') {
+                        // help
+                        print_pdb_help();
+                } else if (cmd_tokens.front()[0] == 'i') {
+                        // interpret
+                        interpret_program(*this);
+                } else if (cmd_tokens.front()[0] == 'l') {
+                        // next instruction to run
+                        print_instruction_simple(program_data, prog_ctr);
+                } else if (cmd_tokens.front()[0] == 'n') {
+                        // next
+                        if (cmd_tokens.size() == 2) {
+                                // allow 1+ steps
+                                int16_t num_steps = (int16_t)std::stoi(cmd_tokens.at(1));
+                                num_steps = (num_steps >= 1) ? num_steps : 1;
+                                num_instructions_left = num_steps;
+                        } else {
+                                num_instructions_left = 1;
+                        }
+
+                        // next
+                } else if (cmd_tokens.front()[0] == 'p') {
+                        // print
+                        pdb_handle_print(cmd_tokens, *this);
+                } else if (cmd_tokens.front()[0] == 'q') {
+                        // quit
+                        break;
+                } else {
+                        std::cout << "unrecognized command\n";
+                }
+
+                bool previously_ran = false;
+                while (!hit_exit && (num_instructions_left > 0 || continue_cond)) {
+                        // run_instructions
+                        for (int16_t address : breakpoints) {
+                                if (prog_ctr == address) {
+                                        continue_cond = false;
+                                        num_instructions_left = 0;
+                                        break;
+                                }
+                        }
+                        next_instruction(hit_exit);
+                        if (!continue_cond)
+                                num_instructions_left--;
+                        previously_ran = true;
+                }
+
+                // prevent extraneous print when starting debugger
+                if (!hit_exit && previously_ran) {
+                        // print next instruction to run
+                        print_instruction_simple(program_data, prog_ctr);
+                        previously_ran = false;
+                }
+        }
+}
+
