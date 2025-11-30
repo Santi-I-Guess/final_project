@@ -150,3 +150,58 @@ This is particularly useful for testing smaller programs without making an
 entire file, such as
 - <code>printf "main: EXIT\n" | ./final_project</code>
 - <code>Write-Output "main: EXIT\n" | .\\final/project<code>
+
+# Pal Debugger
+When running the program with the -d flag, the program enters the Pal Debugger
+before running the program. Intended to be similar to the GNU Debugger (gdb),
+this offers a variety of commands to help debug programs and memory issues.
+
+## break
+When given an address in the program (without any prefixes), the debugger
+will halt execution right before the specified address. If the second argument
+is "list", then all current breakpoints will be listed (not necesarily in
+sorted order).
+
+## clear
+Unlike gdb, the clear command clears the terminal. The equivalent command of
+clear in gdb would be delete in PalDB
+
+## continue
+This will continue the program's execution until a breakpoint is hit, or until
+the program hits an EXIT instruction. Unlike gdb, the program doesn not need
+to already be running, as PalDB does not provide a run command. Also unlike
+gdb, when the program hits the EXIT instruction, PalDB will also exit.
+
+## delete
+If given a address that was set to a breakpoint, said address will have it's
+breakpoint removed at that address. If no address is given, all breakpoints
+will be deleted.
+
+## help
+The help command shows a summary of commands that PalDB can take in.
+
+## interpret
+This will print out the disassembled user program, showing program addresses
+of every instruction, the addresses to the string literal data, and the
+address of the main label.
+
+## list
+The list command simply lists the next instruction to be performed, in a similar
+format to the interpret command. Unlike gdb, you can not list the instructions
+outside the next instruction
+
+## next
+Execute the next instruction in the user program
+
+## print
+Print the specified value. This can be a register value, stack offset, or
+address in program memory / ram. Examples:
+- p RA
+- p RIP
+- p %0
+- p %1
+- p MEM\[0\]
+- p MEM\[100\]
+
+## quit
+Quit the debugger, and exit the program

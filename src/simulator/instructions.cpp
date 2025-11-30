@@ -14,34 +14,18 @@ void ins_nop(CPU_Handle &cpu_handle) {
 void ins_mov(CPU_Handle &cpu_handle) {
         int16_t &prog_ctr = cpu_handle.prog_ctr;
         int16_t *program_data = cpu_handle.program_data;
-
         int16_t dest = program_data[prog_ctr + 1];
         int16_t value = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
 
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
-
+        update_register(cpu_handle, dest, value);
         prog_ctr += INSTRUCTION_LENS[1];
 }
 
 void ins_inc(CPU_Handle &cpu_handle) {
         int16_t *program_data = cpu_handle.program_data;
         int16_t &prog_ctr = cpu_handle.prog_ctr;
-
         int16_t dest = program_data[prog_ctr + 1];
+
         if (dest < 0 || dest > 7) {
                 std::cout << "Error: " << error_messages[0] << "\n";
                 std::exit(1);
@@ -64,8 +48,8 @@ void ins_inc(CPU_Handle &cpu_handle) {
 void ins_dec(CPU_Handle &cpu_handle) {
         int16_t *program_data = cpu_handle.program_data;
         int16_t &prog_ctr = cpu_handle.prog_ctr;
-
         int16_t dest = program_data[prog_ctr + 1];
+
         if (dest < 0 || dest > 7) {
                 std::cout << "Error: " << error_messages[0] << "\n";
                 std::exit(1);
@@ -92,22 +76,9 @@ void ins_add(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
         int16_t value = src_1 + src_2;
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[4];
 }
@@ -119,22 +90,9 @@ void ins_sub(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
         int16_t value = src_1 - src_2;
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[5];
 }
@@ -146,22 +104,9 @@ void ins_mul(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
         int16_t value = src_1 * src_2;
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[6];
 }
@@ -173,26 +118,13 @@ void ins_div(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
-
         if (src_2 == 0) {
                 std::cout << "Warning: Division by Zero. Result will be 0\n";
         }
-        int16_t value = (int16_t)((src_2 == 0 ? (int16_t)0 : src_1) / (src_2 == 0 ? (int16_t)1 : src_2));
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+        src_1 = (src_2 != 0 ? src_1 : (int16_t)0);
+        src_2 = (src_2 != 0 ? src_2 : (int16_t)1);
+        int16_t value = src_1 / src_2;
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[7];
 }
@@ -204,22 +136,9 @@ void ins_and(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
         int16_t value = src_1 & src_2;
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[8];
 }
@@ -231,22 +150,8 @@ void ins_or(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
         int16_t value = src_1 | src_2;
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[9];
 }
@@ -257,22 +162,9 @@ void ins_not(CPU_Handle &cpu_handle) {
 
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
         int16_t value = ~src_1;
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[10];
 }
@@ -284,22 +176,9 @@ void ins_xor(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
         int16_t value = src_1 ^ src_2;
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[11];
 }
@@ -311,27 +190,12 @@ void ins_lsh(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
-
         if (src_2 < 0) {
                 std::cout << "Warning: Negative Bitshift. Result will be src 1\n";
         }
 
         int16_t value = src_1 << (src_2 < 0 ? 0 : src_2);
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[12];
 }
@@ -343,28 +207,10 @@ void ins_rsh(CPU_Handle &cpu_handle) {
         int16_t dest = program_data[prog_ctr + 1];
         int16_t src_1 = cpu_handle.dereference_value(program_data[prog_ctr + 2]);
         int16_t src_2 = cpu_handle.dereference_value(program_data[prog_ctr + 3]);
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
-
-        if (src_2 < 0) {
+        if (src_2 < 0)
                 std::cout << "Warning: Negative Bitshift. Result will be src 1\n";
-        }
-
-        int16_t value = src_1 >> (src_2 < 0 ? 0 : src_2);
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
-
+        int16_t value = src_1 >> (src_2 > 0 ? src_2 : 0);
+        update_register(cpu_handle, dest, value);
         prog_ctr += INSTRUCTION_LENS[13];
 }
 
@@ -515,21 +361,7 @@ void ins_pop(CPU_Handle &cpu_handle) {
         int16_t value = program_mem[1536 + stack_ptr];
         int16_t dest = program_data[prog_ctr + 1];
 
-        if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
-                std::exit(1);
-        }
-        switch (dest) {
-                case 0: cpu_handle.reg_a = value; break;
-                case 1: cpu_handle.reg_b = value; break;
-                case 2: cpu_handle.reg_c = value; break;
-                case 3: cpu_handle.reg_d = value; break;
-                case 4: cpu_handle.reg_e = value; break;
-                case 5: cpu_handle.reg_f = value; break;
-                case 6: cpu_handle.reg_g = value; break;
-                case 7: cpu_handle.reg_h = value; break;
-                default: break; /* impossible */
-        }
+        update_register(cpu_handle, dest, value);
 
         prog_ctr += INSTRUCTION_LENS[25];
 }
@@ -607,4 +439,22 @@ void ins_sprint(CPU_Handle &cpu_handle) {
 void ins_exit(CPU_Handle &cpu_handle) {
         int16_t &prog_ctr = cpu_handle.prog_ctr;
         prog_ctr += INSTRUCTION_LENS[30];
+}
+
+void update_register(CPU_Handle &cpu_handle, int16_t dest, int16_t value) {
+        if (dest < 0 || dest > 7) {
+                std::cout << "Error: " << error_messages[0] << "\n";
+                std::exit(1);
+        }
+        switch (dest) {
+                case 0: cpu_handle.reg_a = value; break;
+                case 1: cpu_handle.reg_b = value; break;
+                case 2: cpu_handle.reg_c = value; break;
+                case 3: cpu_handle.reg_d = value; break;
+                case 4: cpu_handle.reg_e = value; break;
+                case 5: cpu_handle.reg_f = value; break;
+                case 6: cpu_handle.reg_g = value; break;
+                case 7: cpu_handle.reg_h = value; break;
+                default: break; /* impossible */
+        }
 }

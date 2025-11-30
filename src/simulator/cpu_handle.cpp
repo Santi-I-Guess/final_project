@@ -236,28 +236,7 @@ void CPU_Handle::run_program_debug() {
 
                 // begin parsing
                 if (cmd_tokens.front()[0] == 'b') {
-                        // break
-                        if (cmd_tokens.size() != 2) {
-                                std::cout << "argument required\n";
-                                continue;
-                        }
-                        // check for 2nd argumenteak funname
-                        // check 2nd argument is valid offset
-                        int16_t awaiting = (int16_t)std::stoi(cmd_tokens.at(1));
-                        bool is_valid = false;
-                        for (int16_t address : mnemonic_addrs) {
-                                if (awaiting == address) {
-                                        is_valid = true;
-                                        break;
-                                }
-                        }
-
-                        if (is_valid) {
-                                breakpoints.push_back(awaiting);
-                                std::cout << "added " << awaiting << "\n";
-                        } else {
-                                std::cout << awaiting << " is not a valid breakpoint\n";
-                        }
+                        pdb_handle_break(cmd_tokens, breakpoints, mnemonic_addrs);
                         continue;
                 } else if (cmd_tokens.front() == "clear") {
                         system("clear");
@@ -270,15 +249,15 @@ void CPU_Handle::run_program_debug() {
                         continue;
                 } else if (cmd_tokens.front()[0] == 'h') {
                         // help
-                        print_pdb_help();
+                        pdb_handle_help();
                         continue;
                 } else if (cmd_tokens.front()[0] == 'i') {
                         // interpret
-                        interpret_program(*this);
+                        pdb_handle_interpret(*this);
                         continue;
                 } else if (cmd_tokens.front()[0] == 'l') {
                         // next instruction to run
-                        print_instruction_simple(program_data, prog_ctr);
+                        itrprt_print_instruction(program_data, prog_ctr);
                         continue;
                 } else if (cmd_tokens.front()[0] == 'n') {
                         // next
@@ -338,7 +317,7 @@ void CPU_Handle::run_program_debug() {
                 // prevent extraneous print when starting debugger
                 if (!hit_exit && previously_ran) {
                         // print next instruction to run
-                        print_instruction_simple(program_data, prog_ctr);
+                        itrprt_print_instruction(program_data, prog_ctr);
                         previously_ran = false;
                 }
         }

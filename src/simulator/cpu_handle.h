@@ -93,7 +93,11 @@ public:
         friend void ins_print(CPU_Handle &cpu_handle);
         friend void ins_sprint(CPU_Handle &cpu_handle);
         friend void ins_exit(CPU_Handle &cpu_handle);
-
+        friend void pdb_handle_break(
+                const std::vector<std::string> cmd_tokens,
+                std::vector<int16_t> &breakpoints,
+                const std::vector<int16_t> mnemonic_addrs
+        );
         friend void pdb_handle_delete(
                 const std::vector<std::string> cmd_tokens,
                 std::vector<int16_t> &breakpoints
@@ -101,6 +105,11 @@ public:
         friend void pdb_handle_print(
                 const std::vector<std::string> cmd_tokens,
                 CPU_Handle &cpu_handle
+        );
+        friend void update_register(
+                CPU_Handle &cpu_handle,
+                int16_t dest,
+                int16_t value
         );
 };
 

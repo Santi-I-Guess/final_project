@@ -129,7 +129,6 @@ const std::map<std::string, int16_t> OPCODE_TABLE = {
 
 /**
  * @brief table for lengths, in opcode order, for instruction functions
- * @details generated via a for loop over BLUEPRINTS, to avoid error
  */
 const int16_t INSTRUCTION_LENS[31] = {
         1, 3, 2, 2,
