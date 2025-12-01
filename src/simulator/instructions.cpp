@@ -25,7 +25,7 @@ void ins_inc(CPU_Handle &cpu_handle) {
         int16_t dest = cpu_handle.get_program_data(prog_ctr + 1);
 
         if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
+                std::cout << "Error: " << error_messages[IMMUTABLE_MUTATION] << "\n";
                 std::exit(1);
         }
         switch (dest) {
@@ -48,7 +48,7 @@ void ins_dec(CPU_Handle &cpu_handle) {
         int16_t dest = cpu_handle.get_program_data(prog_ctr + 1);
 
         if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
+                std::cout << "Error: " << error_messages[IMMUTABLE_MUTATION] << "\n";
                 std::exit(1);
         }
         switch (dest) {
@@ -313,7 +313,7 @@ void ins_push(CPU_Handle &cpu_handle) {
         int16_t &stack_ptr = cpu_handle.stack_ptr;
         int16_t *program_mem = cpu_handle.program_mem;
         if (stack_ptr == 512) {
-                std::cout << "Error: " << error_messages[3] << "\n";
+                std::cout << "Error: " << error_messages[STACK_PUSH_ERROR] << "\n";
                 std::exit(1);
         }
         int16_t argument = cpu_handle.dereference_value(cpu_handle.get_program_data(prog_ctr + 1));
@@ -329,7 +329,7 @@ void ins_pop(CPU_Handle &cpu_handle) {
         int16_t *program_mem = cpu_handle.program_mem;
 
         if (stack_ptr == 0) {
-                std::cout << "Error: " << error_messages[4] << "\n";
+                std::cout << "Error: " << error_messages[STACK_POP_ERROR] << "\n";
                 std::exit(1);
         }
 
@@ -349,7 +349,7 @@ void ins_write(CPU_Handle &cpu_handle) {
         int16_t source = cpu_handle.dereference_value(cpu_handle.get_program_data(prog_ctr + 1));
         int16_t address = cpu_handle.dereference_value(cpu_handle.get_program_data(prog_ctr + 2));
         if (address < 0 || address > 1535) {
-                std::cout << "Error: " << error_messages[5] << "\n";
+                std::cout << "Error: " << error_messages[RAM_OUT_OF_BOUNDS] << "\n";
                 std::exit(1);
         }
         program_mem[address] = source;
@@ -364,7 +364,7 @@ void ins_read(CPU_Handle &cpu_handle) {
         int16_t dest = cpu_handle.get_program_data(prog_ctr + 1);
         int16_t address = cpu_handle.dereference_value(cpu_handle.get_program_data(prog_ctr + 2));
         if (address < 0 || address > 1535) {
-                std::cout << "Error: " << error_messages[5] << "\n";
+                std::cout << "Error: " << error_messages[RAM_OUT_OF_BOUNDS] << "\n";
                 std::exit(1);
         }
 
@@ -410,7 +410,7 @@ void ins_cprint(CPU_Handle &cpu_handle) {
         int16_t &prog_ctr = cpu_handle.prog_ctr;
         int16_t value = cpu_handle.dereference_value(cpu_handle.get_program_data(prog_ctr + 1));
         if (value < 0 || value > 127) {
-                std::cout << "Error: " << error_messages[6] << "\n";
+                std::cout << "Error: " << error_messages[ASCII_ERROR] << "\n";
                 std::exit(1);
         }
         std::cout << (char)value;
@@ -423,14 +423,14 @@ void ins_input(CPU_Handle &cpu_handle) {
         int16_t &stack_ptr = cpu_handle.stack_ptr;
         int16_t *program_mem = cpu_handle.program_mem;
         if (stack_ptr == 512) {
-                std::cout << "Error: " << error_messages[3] << "\n";
+                std::cout << "Error: " << error_messages[STACK_PUSH_ERROR] << "\n";
                 std::exit(1);
         }
 
         int16_t value;
         std::cin >> value;
         if (std::cin.fail()) {
-                std::cout << "Error: " << error_messages[7] << "\n";
+                std::cout << "Error: " << error_messages[INPUT_ERROR] << "\n";
                 std::exit(1);
         }
         program_mem[1536 + stack_ptr] = value;
@@ -449,7 +449,7 @@ void update_register(
         const int16_t value)
 {
         if (dest < 0 || dest > 7) {
-                std::cout << "Error: " << error_messages[0] << "\n";
+                std::cout << "Error: " << error_messages[IMMUTABLE_MUTATION] << "\n";
                 std::exit(1);
         }
         switch (dest) {

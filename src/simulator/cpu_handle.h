@@ -6,7 +6,19 @@
 #include <string>
 #include <vector>
 
-const std::string error_messages[10] = {
+enum ERROR_ENUM {
+        IMMUTABLE_MUTATION = 0,
+        STACK_ACCESS_ERROR,
+        UNKNOWN_REGISTER,
+        STACK_PUSH_ERROR,
+        STACK_POP_ERROR,
+        RAM_OUT_OF_BOUNDS,
+        ASCII_ERROR,
+        INPUT_ERROR,
+        CORRUPTION
+};
+
+const std::string error_messages[9] = {
         "attemped to mutate immutable destination",
         "attemped to access stack by offset before stack base",
         "attemped to access unknown register",

@@ -53,7 +53,7 @@ int16_t CPU_Handle::dereference_value(const int16_t given_value) {
                 intended_address = given_value;
                 intended_address ^= (int16_t)(1 << 13);
                 if (intended_address > stack_ptr) {
-                        std::cout << "Error: " << error_messages[1];
+                        std::cout << "Error: " << error_messages[STACK_ACCESS_ERROR];
                         std::cout << "\n";
                         std::exit(1);
                 }
@@ -80,7 +80,7 @@ int16_t CPU_Handle::dereference_value(const int16_t given_value) {
                 case 10: intended_value = reg_cmp_a; break;
                 case 11: intended_value = reg_cmp_b; break;
                 default:
-                        std::cout << "Error: " << error_messages[2];
+                        std::cout << "Error: " << error_messages[UNKNOWN_REGISTER];
                         std::cout << "\n";
                         std::exit(1);
                 }
@@ -91,7 +91,7 @@ int16_t CPU_Handle::dereference_value(const int16_t given_value) {
 
 int16_t CPU_Handle::get_program_data(const int16_t idx) const {
         if (idx < 0 || idx > 2047) {
-                std::cerr << error_messages[5] << "\n";
+                std::cerr << error_messages[RAM_OUT_OF_BOUNDS] << "\n";
                 std::exit(1);
         }
         return program_data[idx];
@@ -124,7 +124,7 @@ void CPU_Handle::next_instruction(bool &hit_exit) {
 
         int16_t opcode = get_program_data(prog_ctr);
         if (opcode < 0 || opcode > 32) {
-                std::cerr << "Error: " << error_messages[8] << "\n";
+                std::cerr << "Error: " << error_messages[CORRUPTION] << "\n";
                 std::exit(1);
         }
         std::string mnem_name = DEREFERENCE_TABLE[opcode];
