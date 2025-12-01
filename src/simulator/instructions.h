@@ -35,6 +35,7 @@ void ins_write(CPU_Handle  &cpu_handle);
 void ins_read(CPU_Handle   &cpu_handle);
 void ins_print(CPU_Handle  &cpu_handle);
 void ins_sprint(CPU_Handle &cpu_handle);
+void ins_cprint(CPU_Handle &cpu_handle);
 void ins_exit(CPU_Handle   &cpu_handle);
 void update_register(
         CPU_Handle &cpu_handle,

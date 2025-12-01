@@ -109,6 +109,7 @@ const std::map<std::string, std::vector<Atom_Type>> BLUEPRINTS = {
         {"READ",   {MNEMONIC, REGISTER, LITERAL_INT   } },
         {"PRINT",  {MNEMONIC, SOURCE                  } },
         {"SPRINT", {MNEMONIC, LITERAL_STR             } },
+        {"CPRINT", {MNEMONIC, SOURCE                  } },
         {"EXIT",   {MNEMONIC,                         } },
 };
 
@@ -117,20 +118,20 @@ const std::map<std::string, std::vector<Atom_Type>> BLUEPRINTS = {
  * @brief hashmap for valid opcodes for each mnemoinc in assembly language
  */
 const std::map<std::string, int16_t> OPCODE_TABLE = {
-        {"NOP",    0}, {"MOV",     1}, {"INC",    2}, {"DEC",   3},
-        {"ADD",    4}, {"SUB",     5}, {"MUL",    6}, {"DIV",   7},
-        {"AND",    8}, {"OR",      9}, {"NOT",   10}, {"XOR",  11},
-        {"LSH",   12}, {"RSH",    13}, {"CMP",   14}, {"JMP",  15},
-        {"JEQ",   16}, {"JNE",    17}, {"JGE",   18}, {"JGR",  19},
-        {"JLE",   20}, {"JLS",    21}, {"CALL",  22}, {"RET",  23},
-        {"PUSH",  24}, {"POP",    25}, {"WRITE", 26}, {"READ", 27},
-        {"PRINT", 28}, {"SPRINT", 29}, {"EXIT",  30},
+        {"NOP",    0}, {"MOV",     1}, {"INC",     2}, {"DEC",   3},
+        {"ADD",    4}, {"SUB",     5}, {"MUL",     6}, {"DIV",   7},
+        {"AND",    8}, {"OR",      9}, {"NOT",    10}, {"XOR",  11},
+        {"LSH",   12}, {"RSH",    13}, {"CMP",    14}, {"JMP",  15},
+        {"JEQ",   16}, {"JNE",    17}, {"JGE",    18}, {"JGR",  19},
+        {"JLE",   20}, {"JLS",    21}, {"CALL",   22}, {"RET",  23},
+        {"PUSH",  24}, {"POP",    25}, {"WRITE",  26}, {"READ", 27},
+        {"PRINT", 28}, {"SPRINT", 29}, {"CPRINT", 30}, {"EXIT", 31},
 };
 
 /**
  * @brief table for lengths, in opcode order, for instruction functions
  */
-const int16_t INSTRUCTION_LENS[31] = {
+const int16_t INSTRUCTION_LENS[32] = {
         1, 3, 2, 2,
         4, 4, 4, 4,
         4, 4, 3, 4,
@@ -138,14 +139,14 @@ const int16_t INSTRUCTION_LENS[31] = {
         2, 2, 2, 2,
         2, 2, 2, 1,
         2, 2, 3, 3,
-        2, 2, 1
+        2, 2, 2, 1
 };
 
 /**
  * @brief dereference array for CPU_Handle::interpret_program()
  * @details opposite to OPCODE_TABLE
  */
-const std::string DEREFERENCE_TABLE[31] = {
+const std::string DEREFERENCE_TABLE[32] = {
         "NOP",   "MOV",    "INC",   "DEC",
         "ADD",   "SUB",    "MUL",   "DIV",
         "AND",   "OR",     "NOT",   "XOR",
@@ -153,7 +154,7 @@ const std::string DEREFERENCE_TABLE[31] = {
         "JEQ",   "JNE",    "JGE",   "JGR",
         "JLE",   "JLS",    "CALL",  "RET",
         "PUSH",  "POP",    "WRITE", "READ",
-        "PRINT", "SPRINT", "EXIT"
+        "PRINT", "SPRINT", "CPRINT", "EXIT"
 };
 
 /**

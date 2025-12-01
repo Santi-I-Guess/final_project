@@ -122,6 +122,7 @@ instruction. Failing to do so causes an assembler error.
 | READ         | dest      | addr      |           | dest = ram\[addr\]         |
 | PRINT        | src       |           |           | print(src)                 |
 | SPRINT       | string    |           |           | print(string)              |
+| CPRINT       | src       |           |           | print((ascii)src)          |
 | EXIT         |           |           |           | exit()                     |
 
 # Addressing Modes (Source Arguments)

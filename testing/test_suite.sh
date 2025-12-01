@@ -73,6 +73,40 @@ basic_loop_check() {
     printf "%s\n" "$program" | ../final_project
 }
 
+ascii_check() {
+    # check CPRINT
+    printf "\x1b[32mAscii Check:\x1b[0m\n"
+    printf "\x1b[32mExpect: lowercase a-z, then uppercase A-Z, on seperate lines\x1b[0m\n"
+    escaped_n="n"
+    program="\
+        print_alphabet:
+        ; RA is the value, RB is the bounds
+        POP RA
+        MOV RB, RA
+        ADD RB, RB, \$26
+        again_1:
+        CPRINT RA
+        INC RA
+        CMP RA, RB
+        JGE next_1
+        SPRINT \" \"
+        JLS again_1
+        next_1:
+        SPRINT \"\\${escaped_n}\"
+        RET
+        ;
+        main:
+        PUSH \$97
+        CALL print_alphabet
+        PUSH \$65
+        CALL print_alphabet
+        EXIT
+    "
+    printf "%s\n" "${program}" | ../final_project
+
+}
+
 print_check
 read_write_check
 basic_loop_check
+ascii_check

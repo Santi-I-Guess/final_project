@@ -71,6 +71,7 @@ some changes to make usage simple.
 | READ         | dest      | addr      |           |
 | PRINT        | src       |           |           |
 | SPRINT       | string    |           |           |
+| CPRINT       | src       |           |           |
 | EXIT         |           |           |           |
 
 ## Syntax (Backus-Naur Form)

@@ -436,9 +436,23 @@ void ins_sprint(CPU_Handle &cpu_handle) {
         prog_ctr += INSTRUCTION_LENS[29];
 }
 
+void ins_cprint(CPU_Handle &cpu_handle) {
+        int16_t &prog_ctr = cpu_handle.prog_ctr;
+        int16_t *program_data = cpu_handle.program_data;
+
+        int16_t value = cpu_handle.dereference_value(program_data[prog_ctr + 1]);
+        if (value < 0 || value > 127) {
+                std::cout << "Error: " << error_messages[6] << "\n";
+                std::exit(1);
+        }
+        std::cout << (char)value;
+
+        prog_ctr += INSTRUCTION_LENS[30];
+}
+
 void ins_exit(CPU_Handle &cpu_handle) {
         int16_t &prog_ctr = cpu_handle.prog_ctr;
-        prog_ctr += INSTRUCTION_LENS[30];
+        prog_ctr += INSTRUCTION_LENS[31];
 }
 
 void update_register(
