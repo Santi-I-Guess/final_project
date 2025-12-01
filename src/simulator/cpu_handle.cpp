@@ -179,6 +179,8 @@ void CPU_Handle::next_instruction(bool &hit_exit) {
                 ins_sprint(*this);
         } else if (mnem_name == "CPRINT") {
                 ins_cprint(*this);
+        } else if (mnem_name == "INPUT") {
+                ins_input(*this);
         } else if (mnem_name == "EXIT") {
                 ins_exit(*this);
                 hit_exit = true;

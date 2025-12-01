@@ -6,14 +6,15 @@
 #include <string>
 #include <vector>
 
-const std::string error_messages[7] = {
+const std::string error_messages[8] = {
         "attemped to mutate immutable destination",
         "attemped to access stack by offset before stack base",
         "attemped to access unknown register",
         "attemped to push past stack bounds",
         "attemped to push before stack bounds",
         "attemped to access out of bounds memory",
-        "attempted to print invalid ascii character"
+        "attempted to print invalid ascii character",
+        "attempted to input invalid int16_t"
 };
 
 /**
@@ -92,6 +93,7 @@ public:
         friend void ins_print(CPU_Handle &cpu_handle);
         friend void ins_sprint(CPU_Handle &cpu_handle);
         friend void ins_cprint(CPU_Handle &cpu_handle);
+        friend void ins_input(CPU_Handle &cpu_handle);
         friend void ins_exit(CPU_Handle &cpu_handle);
         friend void pdb_handle_break(
                 const std::vector<std::string> cmd_tokens,

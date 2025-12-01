@@ -72,6 +72,7 @@ some changes to make usage simple.
 | PRINT        | src       |           |           |
 | SPRINT       | string    |           |           |
 | CPRINT       | src       |           |           |
+| INPUT        |           |           |           |
 | EXIT         |           |           |           |
 
 ## Syntax (Backus-Naur Form)

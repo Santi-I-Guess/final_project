@@ -450,9 +450,29 @@ void ins_cprint(CPU_Handle &cpu_handle) {
         prog_ctr += INSTRUCTION_LENS[30];
 }
 
+void ins_input(CPU_Handle &cpu_handle) {
+        int16_t &prog_ctr = cpu_handle.prog_ctr;
+        int16_t &stack_ptr = cpu_handle.stack_ptr;
+        int16_t *program_mem = cpu_handle.program_mem;
+        if (stack_ptr == 2047) {
+                std::cout << "Error: " << error_messages[4] << "\n";
+                std::exit(1);
+        }
+
+        int16_t value;
+        std::cin >> value;
+        if (std::cin.fail()) {
+                std::cout << "Error: " << error_messages[7] << "\n";
+                std::exit(1);
+        }
+        program_mem[1536 + stack_ptr] = value;
+        stack_ptr++;
+        prog_ctr += INSTRUCTION_LENS[31];
+}
+
 void ins_exit(CPU_Handle &cpu_handle) {
         int16_t &prog_ctr = cpu_handle.prog_ctr;
-        prog_ctr += INSTRUCTION_LENS[31];
+        prog_ctr += INSTRUCTION_LENS[32];
 }
 
 void update_register(

@@ -110,6 +110,7 @@ const std::map<std::string, std::vector<Atom_Type>> BLUEPRINTS = {
         {"PRINT",  {MNEMONIC, SOURCE                  } },
         {"SPRINT", {MNEMONIC, LITERAL_STR             } },
         {"CPRINT", {MNEMONIC, SOURCE                  } },
+        {"INPUT",  {MNEMONIC,                         } },
         {"EXIT",   {MNEMONIC,                         } },
 };
 
@@ -125,13 +126,14 @@ const std::map<std::string, int16_t> OPCODE_TABLE = {
         {"JEQ",   16}, {"JNE",    17}, {"JGE",    18}, {"JGR",  19},
         {"JLE",   20}, {"JLS",    21}, {"CALL",   22}, {"RET",  23},
         {"PUSH",  24}, {"POP",    25}, {"WRITE",  26}, {"READ", 27},
-        {"PRINT", 28}, {"SPRINT", 29}, {"CPRINT", 30}, {"EXIT", 31},
+        {"PRINT", 28}, {"SPRINT", 29}, {"CPRINT", 30}, {"INPUT", 31},
+        {"EXIT", 32},
 };
 
 /**
  * @brief table for lengths, in opcode order, for instruction functions
  */
-const int16_t INSTRUCTION_LENS[32] = {
+const int16_t INSTRUCTION_LENS[33] = {
         1, 3, 2, 2,
         4, 4, 4, 4,
         4, 4, 3, 4,
@@ -139,14 +141,15 @@ const int16_t INSTRUCTION_LENS[32] = {
         2, 2, 2, 2,
         2, 2, 2, 1,
         2, 2, 3, 3,
-        2, 2, 2, 1
+        2, 2, 2, 1,
+        1
 };
 
 /**
  * @brief dereference array for CPU_Handle::interpret_program()
  * @details opposite to OPCODE_TABLE
  */
-const std::string DEREFERENCE_TABLE[32] = {
+const std::string DEREFERENCE_TABLE[33] = {
         "NOP",   "MOV",    "INC",   "DEC",
         "ADD",   "SUB",    "MUL",   "DIV",
         "AND",   "OR",     "NOT",   "XOR",
@@ -154,7 +157,8 @@ const std::string DEREFERENCE_TABLE[32] = {
         "JEQ",   "JNE",    "JGE",   "JGR",
         "JLE",   "JLS",    "CALL",  "RET",
         "PUSH",  "POP",    "WRITE", "READ",
-        "PRINT", "SPRINT", "CPRINT", "EXIT"
+        "PRINT", "SPRINT", "CPRINT", "INPUT",
+        "EXIT"
 };
 
 /**

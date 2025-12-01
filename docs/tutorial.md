@@ -123,6 +123,7 @@ instruction. Failing to do so causes an assembler error.
 | PRINT        | src       |           |           | print(src)                 |
 | SPRINT       | string    |           |           | print(string)              |
 | CPRINT       | src       |           |           | print((ascii)src)          |
+| INPUT        |           |           |           | push((int16_t)input())     |
 | EXIT         |           |           |           | exit()                     |
 
 # Addressing Modes (Source Arguments)
