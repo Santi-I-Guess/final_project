@@ -49,6 +49,7 @@ some changes to make usage simple.
 | SUB          | dest      | src0       | src1      |
 | MUL          | dest      | src0       | src1      |
 | DIV          | dest      | src0       | src1      |
+| MOD          | dest      | src0       | src1      |
 | AND          | dest      | src0       | src1      |
 | OR           | dest      | src0       | src1      |
 | NOT          | dest      | src0       |           |

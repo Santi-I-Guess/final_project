@@ -5,6 +5,7 @@
 
 // functions to simulate instructions
 
+int16_t clamp(const int16_t value);
 void ins_nop(CPU_Handle    &cpu_handle);
 void ins_mov(CPU_Handle    &cpu_handle);
 void ins_inc(CPU_Handle    &cpu_handle);
@@ -13,6 +14,7 @@ void ins_add(CPU_Handle    &cpu_handle);
 void ins_sub(CPU_Handle    &cpu_handle);
 void ins_mul(CPU_Handle    &cpu_handle);
 void ins_div(CPU_Handle    &cpu_handle);
+void ins_mod(CPU_Handle    &cpu_handle);
 void ins_and(CPU_Handle    &cpu_handle);
 void ins_or(CPU_Handle     &cpu_handle);
 void ins_not(CPU_Handle    &cpu_handle);

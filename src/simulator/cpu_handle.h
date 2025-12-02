@@ -85,6 +85,7 @@ public:
         friend void ins_sub(CPU_Handle &cpu_handle);
         friend void ins_mul(CPU_Handle &cpu_handle);
         friend void ins_div(CPU_Handle &cpu_handle);
+        friend void ins_mod(CPU_Handle &cpu_handle);
         friend void ins_and(CPU_Handle &cpu_handle);
         friend void ins_or(CPU_Handle &cpu_handle);
         friend void ins_not(CPU_Handle &cpu_handle);

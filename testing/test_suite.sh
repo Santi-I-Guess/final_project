@@ -2,7 +2,8 @@
 
 set -o nounset
 
-# using SPRINT and PRINT instruction to do my testing
+# using stdin mode of final_project to see if input is expected
+# all checks here should result in expected output, and no errors
 
 print_check() {
     printf "\x1b[32mPrint Check:\x1b[0m\n"
@@ -17,6 +18,7 @@ print_check() {
             JLE again
             EXIT")
     printf "%s\n" "$program" | ../final_project
+    printf "\n"
 }
 
 read_write_check() {
@@ -39,6 +41,7 @@ read_write_check() {
         ;
         EXIT")
     printf "%s\n" "$program" | ../final_project
+    printf "\n"
 }
 
 basic_loop_check() {
@@ -77,6 +80,7 @@ basic_loop_check() {
         EXIT
     "
     printf "%s\n" "$program" | ../final_project
+    printf "\n"
 }
 
 ascii_check() {
@@ -109,13 +113,13 @@ ascii_check() {
         EXIT
     "
     printf "%s\n" "${program}" | ../final_project
+    printf "\n"
 }
 
-arithmetic_check() {
+loop_check_2() {
     printf "\x1b[32mArithmetic Check:\x1b[0m\n"
     printf "\x1b[32mExpect: Multiplication Table for 2-99\x1b[0m\n"
     program="\
-    ; somehow opcode is corrupted at RSP 515
     align_right:
         ; assume 1-3 digits
         CMP %0, \$10    JLS one_digit
@@ -155,13 +159,48 @@ arithmetic_check() {
         CALL print_row
         POP RA
         INC RA
-        CMP RA, \$100
+        CMP RA, \$11
         JLS main_loop
-        JLS main_loop
-        EXIT
         EXIT
     "
     printf "%s\n" "${program}" | ../final_project
+    printf "\n"
+
+    printf "\x1b[32mExpect: Powers of 2, ascending, then descending\x1b[0m\n"
+    program_2="\
+        main:
+            ; RB as ctr
+            MOV RB, \$0
+        again:
+            LSH RA, \$1, RB
+            PRINT RA
+            CPRINT \$32
+            INC RB
+            CMP RB, \$15
+            JLS again
+        ;
+            CPRINT \$10
+        again_2:
+            DEC RB
+            LSH RA, \$1, RB
+            PRINT RA
+            CPRINT \$32
+            CMP RB, \$0
+            JGR again_2
+            CPRINT \$10
+            EXIT
+    "
+    printf "%s\n" "${program_2}" | ../final_project
+    printf "\n"
+}
+
+arithmetic_check() {
+    printf "\x1b[32mExpect: Series of arithmetic operations, then the result\x1b[0m\n"
+    # following program was mass generated with python
+    # right now, only has ADD, SUB, MUL, and DIV
+    program=$(python3 arithmetic_test_generation.py)
+    printf "%s\n" "${program}" | ../final_project
+    printf "\n"
 }
 
 tests=(
@@ -169,9 +208,9 @@ tests=(
     read_write_check
     basic_loop_check
     ascii_check
+    loop_check_2
     arithmetic_check
 )
-
 
 if [[ "${#}" -ne 1 ]]; then
     printf "usage: ./test_suite.sh <index|\"all\">\n"
@@ -185,17 +224,10 @@ if [[ ! "${1}" =~ ^[0-9]+$ ]]; then
         ${tests[2]}
         ${tests[3]}
         ${tests[4]}
+        ${tests[5]}
     else
         printf "non-digit argument is not \"all\"\n"
     fi
-elif [[ ${1} -eq 1 ]]; then
-    ${tests[0]}
-elif [[ ${1} -eq 2 ]]; then
-    ${tests[1]}
-elif [[ ${1} -eq 3 ]]; then
-    ${tests[2]}
-elif [[ ${1} -eq 4 ]]; then
-    ${tests[3]}
-elif [[ ${1} -eq 5 ]]; then
-    ${tests[4]}
+else
+    ${tests[${1}]}
 fi

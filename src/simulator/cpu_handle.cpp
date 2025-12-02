@@ -91,7 +91,7 @@ int16_t CPU_Handle::dereference_value(const int16_t given_value) {
 
 int16_t CPU_Handle::get_program_data(const int16_t idx) const {
         if (idx < 0 || idx > prog_size) {
-                std::cerr << error_messages[RAM_OUT_OF_BOUNDS] << "\n";
+                std::cerr << error_messages[CORRUPTION] << "\n";
                 std::exit(1);
         }
         return program_data[idx];
@@ -123,7 +123,7 @@ void CPU_Handle::next_instruction(bool &hit_exit) {
                 prog_ctr = get_program_data(4);
 
         int16_t opcode = get_program_data(prog_ctr);
-        if (opcode < 0 || opcode > 32) {
+        if (opcode < 0 || opcode > (int16_t)(sizeof(INSTRUCTION_LENS) / sizeof(int16_t))) {
                 std::cerr << "Error: " << error_messages[CORRUPTION] << "\n";
                 std::exit(1);
         }
@@ -150,6 +150,8 @@ void CPU_Handle::next_instruction(bool &hit_exit) {
                 ins_mul(*this);
         } else if (mnem_name == "DIV") {
                 ins_div(*this);
+        } else if (mnem_name == "MOD") {
+                ins_mod(*this);
         } else if (mnem_name == "AND") {
                 ins_and(*this);
         } else if (mnem_name == "OR") {
@@ -206,8 +208,7 @@ void CPU_Handle::next_instruction(bool &hit_exit) {
 
 void CPU_Handle::run_program() {
         bool hit_exit = false;
-        if (prog_ctr == 0)
-                prog_ctr = get_program_data(4);
+        prog_ctr = get_program_data(4);
 
         while (!hit_exit) {
                 next_instruction(hit_exit);
