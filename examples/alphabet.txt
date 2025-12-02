@@ -1,0 +1,22 @@
+print_alphabet:
+    ; RA is the value, RB is the bounds
+    POP RA
+    MOV RB, RA
+    ADD RB, RB, $26
+again_1:
+    CPRINT RA
+    INC RA
+    CMP RA, RB
+    JGE next_1
+    SPRINT " "
+    JLS again_1
+next_1:
+    SPRINT "\n"
+    RET
+
+main:
+    PUSH $97
+    CALL print_alphabet
+    PUSH $65
+    CALL print_alphabet
+    EXIT

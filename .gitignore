@@ -8,3 +8,4 @@ testing/__pycache__
 *.pdf
 *.txt
 *.typ
+!examples/*.txt

@@ -1,0 +1,9 @@
+
+main:
+    INPUT ; pushes given integer to stack
+    ADD RA, %0, $5
+    PRINT %0
+    SPRINT " + 5 = "
+    PRINT RA
+    CPRINT $10 ; newline
+    EXIT
