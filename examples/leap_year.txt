@@ -1,0 +1,27 @@
+; calculate leap year based on user input
+main:
+    ; RA as temp variable, %0 as input
+    SPRINT "Enter a year: "
+    INPUT
+    ; yes if divisible by 400
+    MOD RA, %0, $400
+    CMP RA, $0
+    JEQ is_leap_year
+    ; else no if divisible by 100
+    MOD RA, %0, $100
+    CMP RA, $0
+    JNE not_leap_year
+    ; else yes if divisible by 4
+    MOD RA, %0, $4
+    CMP RA, $0
+    JEQ is_leap_year
+not_leap_year:
+    PRINT %0
+    SPRINT " is not a leap year\n"
+    JMP final
+is_leap_year:
+    PRINT %0
+    SPRINT " is a leap year\n"
+final:
+    EXIT
+

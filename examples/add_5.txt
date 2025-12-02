@@ -1,4 +1,4 @@
-
+; add 5 to the number given by the user
 main:
     INPUT ; pushes given integer to stack
     ADD RA, %0, $5
