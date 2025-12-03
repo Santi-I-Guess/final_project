@@ -327,7 +327,13 @@ Debug_Info grammar_check(
                                         || (curr_token.type == T_REGISTER)
                                         || (curr_token.type == T_STACK_OFF);
                         }
-                        if (!(atom_check_res && type_check_res)) {
+                        bool is_valid_arg = atom_check_res && type_check_res;
+                        if (!is_valid_arg && curr_blueprint.at(arg_idx) == LABEL) {
+                                context.grammar_retval = UNKNOWN_LABEL_E;
+                                context.line_num = first_token.line_num;
+                                context.relevant_token = curr_token;
+                                return context;
+                        } else if (!is_valid_arg) {
                                 context.grammar_retval = INVALID_ATOM_E;
                                 context.line_num = first_token.line_num;
                                 context.relevant_token = curr_token;

@@ -9,6 +9,7 @@
 #define RAM_SIZE 3000
 #define STACK_START 2250
 #define STACK_SIZE 750
+#define CALL_STACK_SIZE 2014
 
 /**
  * @brief enum for atom (a.k.a. argument) type

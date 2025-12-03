@@ -10,6 +10,7 @@ Cmd_Options::Cmd_Options() {
         intermediate_files    = false;
         is_binary_input       = false;
         is_debug              = false;
+        optimize              = false;
         test_only             = false;
 }
 
@@ -30,6 +31,8 @@ void Cmd_Options::store_cmd_args(const int argc, char ** const argv) {
                         intermediate_files = true;
                 else if (curr_arg == "-d" || curr_arg == "--debug") 
                         is_debug = true;
+                else if (curr_arg == "-o" || curr_arg == "--optimize") 
+                        optimize = true;
                 else if (curr_arg == "-t" || curr_arg == "--test-only") 
                         test_only = true;
                 else if (curr_arg[0] == '-') 
@@ -79,6 +82,10 @@ void print_help() {
         "      enable PAL debugger (pdb) when running the program\n\n"
         "  -h, --help\n"
         "      show this help screen\n\n"
+        "  -o, --optimize\n"
+        "      during program synthesis, attempt to optimize program with"
+               " unreachable code elimination and peephole optimizaion."
+               " very experimental.\n\n"
         "  -s, --save-temps\n"
         "      create and run ascii source file as normal, but also create \n"
         "      intermediate ascii files for tokenizer and label table.\n\n"

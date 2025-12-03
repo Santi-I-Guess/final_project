@@ -8,28 +8,32 @@
 
 #include "../common_values.h"
 
-enum ERROR_ENUM {
-        IMMUTABLE_MUTATION = 0,
-        STACK_ACCESS_ERROR,
+enum Runtime_Error_Enum {
+        STACK_OVERFLOW = 0,
+        STACK_UNDERFLOW,
+        CALL_STACK_OVERFLOW,
+        CALL_STACK_UNDERFLOW,
+        IMMUTABLE_MUTATION,
+        INVALID_STACK_OFFSET,
         UNKNOWN_REGISTER,
-        STACK_PUSH_ERROR,
-        STACK_POP_ERROR,
-        RAM_OUT_OF_BOUNDS,
+        OOB_ADDRESS,
         ASCII_ERROR,
         INPUT_ERROR,
-        UNKNOWN_OPCODE
+        UNKNOWN_OPCODE,
 };
 
-const std::string ERROR_MESSAGES[9] = {
+const std::string RUNTIME_ERROR_MESSAGES[11] = {
+        "stack overflow",
+        "stack underflow",
+        "call stack overflow",
+        "call stack underflow",
         "attemped to mutate immutable destination",
-        "attemped to access stack by offset before stack base",
-        "attemped to access unknown register",
-        "attemped to push past stack bounds",
-        "attemped to push before stack bounds",
-        "attemped to access out of bounds memory",
+        "invalid stack offset",
+        "unknown register",
+        "attempted to access out of bounds memory",
         "attempted to print invalid ascii character",
         "attempted to input invalid int16_t",
-        "attempted to run invalid opcode (suspicious corruption)"
+        "invalid opcode (suspicious address)",
 };
 
 /**
@@ -61,7 +65,7 @@ class CPU_Handle {
         int16_t prog_ctr; /** program counter / instruction pointer */
         int16_t stack_ptr; /** stack counter / pointer */
         int16_t call_stack_ptr;
-        int16_t call_stack[1024]; /** holds returns for call stack */
+        int16_t call_stack[CALL_STACK_SIZE]; /** holds returns for call stack */
         int16_t program_mem[RAM_SIZE]; /** holds ram and stack memory */
         int16_t *program_data; /** assembled program */
         int16_t prog_size; /** size of program data */
@@ -130,6 +134,11 @@ public:
                 const int16_t value
         );
 };
+
+/**
+ * @brief print corresponding error message, and exit
+ */
+void handle_runtime_error(Runtime_Error_Enum error_code);
 
 /**
  * @fn void CPU_Handle::load_program(const std::vector<int16_t> given_program)

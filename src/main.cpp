@@ -7,14 +7,6 @@
  * Also hosted at https://github.com/Santi-I-Guess/final_project
  */
 
-
-#define DEBUG
-#undef DEBUG
-
-#ifdef DEBUG
-#include <iomanip>
-#endif
-
 #include <iostream>
 #include <random>
 #include <string>
@@ -23,6 +15,7 @@
 #include <sstream>
 
 #include "assembler/synthesis.h"
+#include "assembler/optimizer.h"
 #include "common_values.h"
 #include "misc/cmd_line_opts.h"
 #include "misc/file_handling.h"
@@ -30,16 +23,73 @@
 
 // every subdirectory of src is isolated in dependencies and function
 
+enum Grammar_Error_Enum {
+        EXPECTED_MNEMONIC_M = 0,
+        INVALID_ATOM_M,
+        MISSING_ARGUMENTS_M,
+        MISSING_EXIT_M,
+        MISSING_MAIN_M,
+        UNKNOWN_LABEL_M,
+        UNKNOWN_MNEMONIC_M,
+};
+
+const std::map<Grammar_Retval, Grammar_Error_Enum> G_ENUM_TRANSLATION = {
+        {EXPECTED_MNEMONIC_E, EXPECTED_MNEMONIC_M},
+        {INVALID_ATOM_E,           INVALID_ATOM_M},
+        {MISSING_ARGUMENTS_E, MISSING_ARGUMENTS_M},
+        {MISSING_EXIT_E,           MISSING_EXIT_M},
+        {MISSING_MAIN_E,           MISSING_MAIN_M},
+        {UNKNOWN_LABEL_E,         UNKNOWN_LABEL_M},
+        {UNKNOWN_MNEMONIC_E,   UNKNOWN_MNEMONIC_M},
+
+};
+
+const std::string GRAMMAR_ERROR_MESSAGES[10] = {
+        "Expected Mnemonic",
+        "Invalid Atom",
+        "Missing Arguments",
+        "Missing Exit",
+        "Missing Main",
+        "Unknown Label",
+        "Unknown Mnemonic",
+};
+
+void handle_grammar_error(
+        const Grammar_Error_Enum error_code,
+        const Debug_Info context,
+        const std::string erroneous_line
+) {
+        // get original error-causing line
+        std::cerr << "\x1b[34mTraceback line " << context.line_num;
+        std::cerr << ":\x1b[0m ";
+        std::cerr << erroneous_line << "\n";
+
+        std::cerr << "\x1b[34mGrammar Error:\x1b[0m ";
+        std::cerr << GRAMMAR_ERROR_MESSAGES[error_code];
+        // intentional lack of newline for first 5 elements
+        switch (error_code) {
+        case EXPECTED_MNEMONIC_M:
+        case INVALID_ATOM_M:
+        case MISSING_ARGUMENTS_M:
+        case UNKNOWN_LABEL_M:
+        case UNKNOWN_MNEMONIC_M:
+                std::cerr << " \"" << context.relevant_token.data << "\"";
+                [[fallthrough]]; // c++17
+        case MISSING_EXIT_M:
+        case MISSING_MAIN_M:
+                std::cerr << "\n";
+                break;
+        }
+        std::exit(1);
+}
+
 std::string generate_file_header() {
         std::random_device rd;
         std::mt19937 mt(rd());
-        std::uniform_int_distribution<int> rand_letter(0, 25);
-        std::string file_header = "";
-        for (int i = 0; i < 10; ++i) {
-                char curr_letter;
-                int letter_idx = rand_letter(mt);
-                curr_letter = (char)letter_idx + 'a';
-                file_header += curr_letter;
+        std::uniform_int_distribution<int> uid(1, 10000);
+        std::string file_header = std::to_string(uid(mt));
+        while (file_header.length() < 5) {
+                file_header = "0" + file_header;
         }
         return file_header;
 }
@@ -85,72 +135,19 @@ int main(int argc, char **argv) {
                         generate_debug_file(file_header, filtered_tokens, label_map);
 
                 Debug_Info context = grammar_check(filtered_tokens, label_map);
-                std::string aux_string;
-                std::stringstream aux_stream;
-                switch (context.grammar_retval) {
-                case ACCEPTABLE_E:
-                        break;
-                case EXPECTED_MNEMONIC_E:
+                if (context.grammar_retval != ACCEPTABLE_E) {
+                        std::stringstream aux_stream;
+                        std::string aux_string;
                         aux_stream << source_buffer;
                         for (int i = 0; i < context.line_num; ++i)
                                 std::getline(aux_stream, aux_string);
-                        std::cout << "\x1b[34mTraceback line " << context.line_num;
-                        std::cout << ":\x1b[0m ";
-                        std::cout << aux_string << "\n";
-                        std::cout << "\x1b[34mGrammar Error:\x1b[0m Expected Mnemonic";
-                        std::cout << " (" << context.relevant_token.data << ")\n";
-                        return 1;
-                case INVALID_ATOM_E:
-                        aux_stream << source_buffer;
-                        for (int i = 0; i < context.line_num; ++i)
-                                std::getline(aux_stream, aux_string);
-                        std::cout << "\x1b[34mTraceback line " << context.line_num;
-                        std::cout << ":\x1b[0m ";
-                        std::cout << aux_string << "\n";
-                        std::cout << "\x1b[34mGrammar Error:\x1b[0m Invalid Atom";
-                        std::cout << " (" << context.relevant_token.data << ")\n";
-                        return 1;
-                case MISSING_ARGUMENTS_E:
-                        aux_stream << source_buffer;
-                        for (int i = 0; i < context.line_num; ++i)
-                                std::getline(aux_stream, aux_string);
-                        std::cout << "\x1b[34mTraceback line " << context.line_num;
-                        std::cout << ":\x1b[0m ";
-                        std::cout << aux_string << "\n";
-                        std::cout << "\x1b[34mGrammar Error:\x1b[0m Missing Arguments";
-                        std::cout << " (" << context.relevant_token.data << ")\n";
-                        return 1;
-                case MISSING_EXIT_E:
-                        std::cout << "\x1b[34mGrammar Error:\x1b[0m Missing Exit\n";
-                        return 1;
-                case MISSING_MAIN_E:
-                        std::cout << "\x1b[34mGrammar Error:\x1b[0m Missing Main\n";
-                        return 1;
-                case UNKNOWN_LABEL_E:
-                        aux_stream << source_buffer;
-                        for (int i = 0; i < context.line_num; ++i)
-                                std::getline(aux_stream, aux_string);
-                        std::cout << "\x1b[34mTraceback line " << context.line_num;
-                        std::cout << ":\x1b[0m ";
-                        std::cout << aux_string << "\n";
-                        std::cout << "\x1b[34mGrammar Error:\x1b[0m Unknown Label";
-                        std::cout << " (" << context.relevant_token.data << ")\n";
-                        return 1;
-                case UNKNOWN_MNEMONIC_E:
-                        aux_stream << source_buffer;
-                        for (int i = 0; i < context.line_num; ++i)
-                                std::getline(aux_stream, aux_string);
-                        std::cout << "\x1b[34mTraceback line " << context.line_num;
-                        std::cout << ":\x1b[0m ";
-                        std::cout << aux_string << "\n";
-                        std::cout << "\x1b[34mGrammar Error:\x1b[0m Unknown Mnemonic";
-                        std::cout << " (" << context.relevant_token.data << ")\n";
-                        return 1;
-                default: /* impossible */
-                        break;
+                        Grammar_Error_Enum error_code = G_ENUM_TRANSLATION.at(context.grammar_retval);
+                        handle_grammar_error(error_code, context, aux_string);
                 }
 
                 final_program = assemble_program(filtered_tokens, label_map);
+                if (life_opts.optimize)
+                        peephole_optimize_program(final_program);
                 // write the assembled program to a binary file
                 if (life_opts.assemble_only) {
                         bool res_temp;

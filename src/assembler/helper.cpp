@@ -56,7 +56,7 @@ bool is_valid_i16(const std::string token) {
 }
 
 bool is_identifier_char(const char i) {
-        if (i == '$' || i == '%' || i == ':' || i == '_' || i == '-')
+        if (i == '$' || i == '%' || i == '.' || i == ':' || i == '_' || i == '-')
                 return true;
         if (isalnum(i))
                 return true;

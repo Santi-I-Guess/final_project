@@ -9,8 +9,8 @@
 #include "../common_values.h"
 
 enum Grammar_Retval {
-        EXPECTED_MNEMONIC_E,
         ACCEPTABLE_E,
+        EXPECTED_MNEMONIC_E,
         INVALID_ATOM_E,
         MISSING_ARGUMENTS_E,
         MISSING_EXIT_E,

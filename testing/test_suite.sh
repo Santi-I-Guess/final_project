@@ -5,6 +5,8 @@ set -o nounset
 # using stdin mode of final_project to see if input is expected
 # all checks here should result in expected output, and no errors
 
+executable="../final_project -o -d"
+
 print_check() {
     printf "\x1b[32mPrint Check:\x1b[0m\n"
     printf "\x1b[32mExpect: 1-50, one per line\x1b[0m\n"
@@ -17,7 +19,7 @@ print_check() {
             CMP RA, \$50
             JLE again
             EXIT")
-    printf "%s\n" "$program" | ../final_project
+    printf "%s\n" "$program" | ${executable}
     printf "\n"
 }
 
@@ -40,7 +42,7 @@ read_write_check() {
             JLS again
         ;
         EXIT")
-    printf "%s\n" "$program" | ../final_project
+    printf "%s\n" "$program" | ${executable}
     printf "\n"
 }
 
@@ -79,7 +81,7 @@ basic_loop_check() {
             JLS again_2
         EXIT
     "
-    printf "%s\n" "$program" | ../final_project
+    printf "%s\n" "$program" | ${executable}
     printf "\n"
 }
 
@@ -112,7 +114,7 @@ ascii_check() {
         CALL print_alphabet
         EXIT
     "
-    printf "%s\n" "${program}" | ../final_project
+    printf "%s\n" "${program}" | ${executable}
     printf "\n"
 }
 
@@ -164,7 +166,7 @@ loop_check_2() {
         JLS main_loop
         EXIT
     "
-    printf "%s\n" "${program}" | ../final_project
+    printf "%s\n" "${program}" | ${executable}
     printf "\n"
 
     printf "\x1b[32mExpect: Powers of 2, ascending, then descending\x1b[0m\n"
@@ -191,7 +193,7 @@ loop_check_2() {
             CPRINT \$10
             EXIT
     "
-    printf "%s\n" "${program_2}" | ../final_project
+    printf "%s\n" "${program_2}" | ${executable}
     printf "\n"
 }
 
@@ -200,7 +202,7 @@ arithmetic_check() {
     # following program was mass generated with python
     # right now, only has ADD, SUB, MUL, and DIV
     program=$(python3 arithmetic_test_generation.py)
-    printf "%s\n" "${program}" | ../final_project
+    printf "%s\n" "${program}" | ${executable}
     printf "\n"
 }
 

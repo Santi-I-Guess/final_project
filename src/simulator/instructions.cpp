@@ -32,8 +32,7 @@ void ins_inc(CPU_Handle &cpu_handle) {
         int16_t &prog_ctr = cpu_handle.prog_ctr;
         int16_t dest = cpu_handle.get_program_data(prog_ctr + 1);
         if (dest < 0 || dest > 7) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[IMMUTABLE_MUTATION] << "\n";
-                std::exit(1);
+                handle_runtime_error(IMMUTABLE_MUTATION);
         }
         int16_t value = cpu_handle.dereference_value(dest) + 1;
         update_register(cpu_handle, dest, value);
@@ -45,8 +44,7 @@ void ins_dec(CPU_Handle &cpu_handle) {
         int16_t &prog_ctr = cpu_handle.prog_ctr;
         int16_t dest = cpu_handle.get_program_data(prog_ctr + 1);
         if (dest < 0 || dest > 7) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[IMMUTABLE_MUTATION] << "\n";
-                std::exit(1);
+                handle_runtime_error(IMMUTABLE_MUTATION);
         }
         int16_t value = cpu_handle.dereference_value(dest) - 1;
         update_register(cpu_handle, dest, value);
@@ -302,19 +300,27 @@ void ins_call(CPU_Handle &cpu_handle) {
         int16_t &call_stack_ptr = cpu_handle.call_stack_ptr;
         int16_t &prog_ctr = cpu_handle.prog_ctr;
         int16_t new_address = cpu_handle.get_program_data(prog_ctr + 1);
-        call_stack[call_stack_ptr] = prog_ctr + 2;
-        call_stack_ptr++;
-        prog_ctr = new_address;
+        if (call_stack_ptr < CALL_STACK_SIZE) {
+                call_stack[call_stack_ptr] = prog_ctr + 2;
+                call_stack_ptr++;
+                prog_ctr = new_address;
+        } else {
+                handle_runtime_error(CALL_STACK_UNDERFLOW);
+        }
 }
 
 void ins_ret(CPU_Handle &cpu_handle) {
         int16_t *call_stack = cpu_handle.call_stack;
         int16_t &call_stack_ptr = cpu_handle.call_stack_ptr;
         int16_t &prog_ctr = cpu_handle.prog_ctr;
-        call_stack_ptr--;
-        int16_t new_address = call_stack[call_stack_ptr];
-        prog_ctr = new_address;
-        // prog_ctr points to next instruction, so INSTRUCTION_LENS[24] unneeded
+        if (call_stack_ptr > 0) {
+                call_stack_ptr--;
+                int16_t new_address = call_stack[call_stack_ptr];
+                prog_ctr = new_address;
+                // prog_ctr points to next instruction, so INSTRUCTION_LENS[24] unneeded
+        } else {
+                handle_runtime_error(CALL_STACK_UNDERFLOW);
+        }
 }
 
 void ins_push(CPU_Handle &cpu_handle) {
@@ -322,8 +328,7 @@ void ins_push(CPU_Handle &cpu_handle) {
         int16_t &stack_ptr = cpu_handle.stack_ptr;
         int16_t *program_mem = cpu_handle.program_mem;
         if (stack_ptr == STACK_SIZE) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[STACK_PUSH_ERROR] << "\n";
-                std::exit(1);
+                handle_runtime_error(STACK_OVERFLOW);
         }
         int16_t raw = cpu_handle.get_program_data(prog_ctr + 1);
         int16_t value = cpu_handle.dereference_value(raw);
@@ -340,8 +345,7 @@ void ins_pop(CPU_Handle &cpu_handle) {
         int16_t *program_mem = cpu_handle.program_mem;
 
         if (stack_ptr <= 0) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[STACK_POP_ERROR] << "\n";
-                std::exit(1);
+                handle_runtime_error(STACK_UNDERFLOW);
         }
 
         stack_ptr--;
@@ -361,8 +365,7 @@ void ins_write(CPU_Handle &cpu_handle) {
         int16_t raw_2 = cpu_handle.get_program_data(prog_ctr + 2);
         int16_t address = cpu_handle.dereference_value(raw_2);
         if (address < 0 || address >= STACK_START) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[RAM_OUT_OF_BOUNDS] << "\n";
-                std::exit(1);
+                handle_runtime_error(OOB_ADDRESS);
         }
         program_mem[address] = value;
         prog_ctr += 3;
@@ -374,8 +377,7 @@ void ins_read(CPU_Handle &cpu_handle) {
         int16_t dest = cpu_handle.get_program_data(prog_ctr + 1);
         int16_t address = cpu_handle.dereference_value(cpu_handle.get_program_data(prog_ctr + 2));
         if (address < 0 || address >= STACK_START) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[RAM_OUT_OF_BOUNDS] << "\n";
-                std::exit(1);
+                handle_runtime_error(OOB_ADDRESS);
         }
         int16_t value = program_mem[address];
         update_register(cpu_handle, dest, value);
@@ -410,8 +412,7 @@ void ins_cprint(CPU_Handle &cpu_handle) {
         int16_t raw = cpu_handle.get_program_data(prog_ctr + 1);
         int16_t value = cpu_handle.dereference_value(raw);
         if (value < 0 || value > 127) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[ASCII_ERROR] << "\n";
-                std::exit(1);
+                handle_runtime_error(ASCII_ERROR);
         }
         std::cout << (char)value;
 
@@ -423,15 +424,14 @@ void ins_input(CPU_Handle &cpu_handle) {
         int16_t &stack_ptr = cpu_handle.stack_ptr;
         int16_t *program_mem = cpu_handle.program_mem;
         if (stack_ptr == STACK_SIZE) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[STACK_PUSH_ERROR] << "\n";
-                std::exit(1);
+                handle_runtime_error(STACK_OVERFLOW);
         }
 
         int16_t value;
         std::string user_input;
         std::getline(std::cin, user_input);
         if (user_input.length() == 0) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[INPUT_ERROR] << "\n";
+                handle_runtime_error(INPUT_ERROR);
         } else if (user_input.length() == 1 && isascii(user_input.at(0))) {
                 // if user inputs a letter, interpret it's ascii value
                 value = (int16_t)((char)user_input.at(0));
@@ -456,8 +456,7 @@ void update_register(
         const int16_t value)
 {
         if (dest < 0 || dest > 7) {
-                std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[IMMUTABLE_MUTATION] << "\n";
-                std::exit(1);
+                handle_runtime_error(IMMUTABLE_MUTATION);
         }
         int16_t clamped_value = clamp(value);
         switch (dest) {

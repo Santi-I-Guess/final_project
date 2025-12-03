@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -27,7 +28,7 @@ CPU_Handle::CPU_Handle() {
         stack_ptr = 0;
         call_stack_ptr = 0;
         // i know int16_t should always be 2 bytes by definition, but whatever
-        memset(call_stack, 0, sizeof(int16_t) * 1024);
+        memset(call_stack, 0, sizeof(int16_t) * CALL_STACK_SIZE);
         memset(program_mem, 0, sizeof(int16_t) * STACK_SIZE);
         program_data = nullptr;
 }
@@ -52,9 +53,7 @@ int16_t CPU_Handle::dereference_value(const int16_t given_value) {
                 intended_address = given_value;
                 intended_address ^= (int16_t)(1 << 13);
                 if (intended_address > stack_ptr || stack_ptr <= 0) {
-                        std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[STACK_ACCESS_ERROR];
-                        std::cout << "\n";
-                        std::exit(1);
+                        handle_runtime_error(INVALID_STACK_OFFSET);
                 }
                 // -1, because stack_ptr points to memory of next element,
                 // not top element
@@ -79,9 +78,7 @@ int16_t CPU_Handle::dereference_value(const int16_t given_value) {
                 case 10: intended_value = reg_cmp_a; break;
                 case 11: intended_value = reg_cmp_b; break;
                 default:
-                        std::cout << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[UNKNOWN_REGISTER];
-                        std::cout << "\n";
-                        std::exit(1);
+                        handle_runtime_error(UNKNOWN_REGISTER);
                 }
         }
         return intended_value;
@@ -90,8 +87,7 @@ int16_t CPU_Handle::dereference_value(const int16_t given_value) {
 
 int16_t CPU_Handle::get_program_data(const int16_t idx) const {
         if (idx < 0 || idx > prog_size) {
-                std::cerr << ERROR_MESSAGES[UNKNOWN_OPCODE] << "\n";
-                std::exit(1);
+                handle_runtime_error(UNKNOWN_OPCODE);
         }
         return program_data[idx];
 }
@@ -123,8 +119,7 @@ void CPU_Handle::next_instruction(bool &hit_exit) {
 
         int16_t opcode = get_program_data(prog_ctr);
         if (opcode < 0 || opcode > (int16_t)(sizeof(INSTRUCTION_LENS) / sizeof(int16_t))) {
-                std::cerr << "\x1b[34mRuntime Error:\x1b[0m " << ERROR_MESSAGES[UNKNOWN_OPCODE] << "\n";
-                std::exit(1);
+                handle_runtime_error(UNKNOWN_OPCODE);
         }
         std::string mnem_name = DEREFERENCE_TABLE[opcode];
 
@@ -355,4 +350,11 @@ void CPU_Handle::run_program_debug() {
                         previously_ran = false;
                 }
         }
+}
+
+
+void handle_runtime_error(Runtime_Error_Enum error_code) {
+        std::cerr << "\x1b[34mRuntime Error:\x1b[0m ";
+        std::cerr << RUNTIME_ERROR_MESSAGES[error_code] << "\n";
+        std::exit(1);
 }
