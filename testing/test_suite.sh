@@ -118,7 +118,7 @@ ascii_check() {
 
 loop_check_2() {
     printf "\x1b[32mArithmetic Check:\x1b[0m\n"
-    printf "\x1b[32mExpect: Multiplication Table for 2-99\x1b[0m\n"
+    printf "\x1b[32mExpect: Multiplication Table for 2-10\x1b[0m\n"
     program="\
     align_right:
         ; assume 1-3 digits
@@ -134,6 +134,7 @@ loop_check_2() {
     JMP align_right_final
     align_right_final:
         PRINT %0
+        CPRINT \$124
         POP RA ; dump parameter
         RET
         ;
