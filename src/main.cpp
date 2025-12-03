@@ -3,25 +3,35 @@
  * Author: Santiago Sagastegui
  *
  * Pseudo assembly simulator for very simplified ISA. Also offers debug
- * flags, intermediate step files, and line-by-line printing.
+ * flags, stdin input, and a dedicated debugger
  * Also hosted at https://github.com/Santi-I-Guess/final_project
  */
 
-#include <vector>
+
+#define DEBUG
+
+#ifdef DEBUG
+#include <iomanip>
+#endif
+
 #include <iostream>
 #include <random>
 #include <string>
+#include <vector>
+#include <string>
+#include <sstream>
 
 #include "assembler/blueprint.h"
 #include "assembler/tokenizer.h"
-#include "assembler/translation.h"
-#include "auxiliary.h"
-#include "common_values.h"
+// #include "assembler/translation.h"
+// #include "auxiliary.h"
+// #include "common_values.h"
 #include "misc/cmd_line_opts.h"
 #include "misc/file_handling.h"
-#include "simulator/cpu_handle.h"
+// #include "simulator/cpu_handle.h"
 
 // every subdirectory of src is isolated in dependencies and function
+
 
 std::string generate_file_header() {
         std::random_device rd;
@@ -39,8 +49,8 @@ std::string generate_file_header() {
 
 int main(int argc, char **argv) {
         Cmd_Options life_opts;
-        // TODO: split handle_cmd_args into store_args and is_valid_args
-        bool valid_cmd_arg_combo = life_opts.handle_cmd_args(argc, argv);
+        life_opts.store_cmd_args(argc, argv);
+        bool valid_cmd_arg_combo = life_opts.is_valid_args();
         if (!valid_cmd_arg_combo)
                 return 0;
 
@@ -51,58 +61,124 @@ int main(int argc, char **argv) {
         // put assembled program here, so assembler module
         //      doesn't require cpu_handle
         std::vector<int16_t> final_program = {};
-        if (life_opts.is_binary_input) {
-                std::string bin_source_path = argv[life_opts.input_file_idx];
-                populate_program_from_binary(final_program, bin_source_path);
-        } else {
-                // store user program into string
-                std::string source_buffer = "";
-                if (life_opts.input_file_idx != -1) {
-                        std::string source_path = argv[life_opts.input_file_idx];
-                        source_buffer = get_source_buffer(source_path, false);
-                } else {
-                        source_buffer = get_source_buffer("", true);
-                }
 
-                // Step 1: tokenize user program and define labels
-                // create_label_map also removes label definitions from tokens
-                // TODO: store associated enum for each token instead of
-                //       quitting early, then check each enum for validitiy
-                std::vector<std::string> tokens = create_tokens(source_buffer);
-                std::map<std::string, int16_t> label_table = create_label_map(tokens);
-                if (life_opts.intermediate_files)
-                        generate_intermediates(file_header, tokens, label_table);
-
-                // Step 2: perform grammar check on tokenized input
-                // functions given handle_ prefix are capable of calling exit
-                Debug_Info res;
-                res = grammar_check(tokens, label_table);
-                handle_grammar_check_res(res);
-
-                // Step 3: assemble program
-                Program_Info program_info = {};
-                program_info.tokens = tokens;
-                program_info.label_table = label_table;
-                res = assemble_program(final_program, program_info);
-                handle_assemble_res(res);
-        }
-
-        // write the assembled program to a binary file
-        if (life_opts.assemble_only) {
-                bool res_temp;
-                res_temp = write_program_to_sink(final_program, file_header);
-                if (!res_temp) {
-                        std::cerr << "Failed to open token sink file\n";
-                        return 1;
-                }
-                return 0;
-        }
-
-        CPU_Handle cpu_handle;
-        cpu_handle.load_program(final_program);
-        if (life_opts.is_debug)
-                cpu_handle.run_program_debug();
+        // choose input source, and put into string
+        std::string source_buffer;
+        if (life_opts.input_file_idx == -1)
+                source_buffer = get_source_buffer("", true);
         else
-                cpu_handle.run_program();
+                source_buffer = get_source_buffer(argv[life_opts.input_file_idx], false);
+
+        // tokenize source_buffer, create label_map
+        std::vector<Token> tokens = create_tokens(source_buffer); 
+
+#ifdef DEBUG
+        for (Token curr_token : tokens) {
+                std::cout << std::left << std::setw(20);
+                std::cout << curr_token.data;
+                std::cout << std::left << std::setw(20);
+                switch (curr_token.type) {
+                case T_INTEGER_LIT:
+                        std::cout << "integer literal";  break;
+                case T_LABEL_DEF:
+                        std::cout << "label definition"; break;
+                case T_LABEL_REF:
+                        std::cout << "label reference";  break;
+                case T_MNEMONIC:
+                        std::cout << "mnemonic";         break;
+                case T_REGISTER:
+                        std::cout << "register";         break;
+                case T_STACK_OFF:
+                        std::cout << "stack offset";     break;
+                case T_STRING_LIT:
+                        std::cout << "string literal";   break;
+                }
+                std::cout << " " << curr_token.line_num << "\n";
+        }
+#endif
+        // store program addresses of user defined label
+        std::map<std::string, int16_t> label_map = create_label_map(tokens);
+
+        // get rid of label declaration tokens, as they are no longer needed
+        std::vector<Token> filtered_tokens;
+        for (Token curr_token : tokens) {
+                if (curr_token.type != T_LABEL_DEF)
+                        filtered_tokens.push_back(curr_token);
+        }
+
+#ifdef DEBUG
+        std::map<std::string, int16_t>::const_iterator it;
+        for (it = label_map.begin(); it != label_map.end(); it++) {
+                std::cout << std::left << std::setw(20);
+                std::cout << it->first << it->second << "\n";
+        }
+#endif
+
+        Debug_Info_2 context = grammar_check_2(filtered_tokens, label_map);
+        std::string aux_string;
+        std::stringstream aux_stream;
+        switch (context.grammar_retval) {
+        case ACCEPTABLE_E:
+                break;
+        case EXPECTED_MNEMONIC_E:
+                aux_stream << source_buffer;
+                for (int i = 0; i < context.line_num; ++i)
+                        std::getline(aux_stream, aux_string);
+                std::cout << "\x1b[34mTraceback line " << context.line_num;
+                std::cout << ":\x1b[0m ";
+                std::cout << aux_string << "\n";
+                std::cout << "\x1b[34mGrammar Error:\x1b[0m Expected Mnemonic";
+                std::cout << " (" << context.relevant_token.data << ")\n";
+                return 1;
+        case INVALID_ATOM_E:
+                aux_stream << source_buffer;
+                for (int i = 0; i < context.line_num; ++i)
+                        std::getline(aux_stream, aux_string);
+                std::cout << "\x1b[34mTraceback line " << context.line_num;
+                std::cout << ":\x1b[0m ";
+                std::cout << aux_string << "\n";
+                std::cout << "\x1b[34mGrammar Error:\x1b[0m Invalid Atom";
+                std::cout << " (" << context.relevant_token.data << ")\n";
+                return 1;
+        case MISSING_ARGUMENTS_E:
+                aux_stream << source_buffer;
+                for (int i = 0; i < context.line_num; ++i)
+                        std::getline(aux_stream, aux_string);
+                std::cout << "\x1b[34mTraceback line " << context.line_num;
+                std::cout << ":\x1b[0m ";
+                std::cout << aux_string << "\n";
+                std::cout << "\x1b[34mGrammar Error:\x1b[0m Missing Arguments";
+                std::cout << " (" << context.relevant_token.data << ")\n";
+                return 1;
+        case MISSING_EXIT_E:
+                std::cout << "\x1b[34mGrammar Error:\x1b[0m Missing Exit\n";
+                return 1;
+        case MISSING_MAIN_E:
+                std::cout << "\x1b[34mGrammar Error:\x1b[0m Missing Main\n";
+                return 1;
+        case UNKNOWN_LABEL_E:
+                aux_stream << source_buffer;
+                for (int i = 0; i < context.line_num; ++i)
+                        std::getline(aux_stream, aux_string);
+                std::cout << "\x1b[34mTraceback line " << context.line_num;
+                std::cout << ":\x1b[0m ";
+                std::cout << aux_string << "\n";
+                std::cout << "\x1b[34mGrammar Error:\x1b[0m Unknown Label";
+                std::cout << " (" << context.relevant_token.data << ")\n";
+                return 1;
+        case UNKNOWN_MNEMONIC_E:
+                aux_stream << source_buffer;
+                for (int i = 0; i < context.line_num; ++i)
+                        std::getline(aux_stream, aux_string);
+                std::cout << "\x1b[34mTraceback line " << context.line_num;
+                std::cout << ":\x1b[0m ";
+                std::cout << aux_string << "\n";
+                std::cout << "\x1b[34mGrammar Error:\x1b[0m Unknown Mnemonic";
+                std::cout << " (" << context.relevant_token.data << ")\n";
+                return 1;
+        default: /* impossible */
+                break;
+        }
+
         return 0;
 }

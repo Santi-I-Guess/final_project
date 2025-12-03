@@ -6,39 +6,142 @@
 #include <sstream>
 
 #include "../common_values.h"
+#include "tokenizer.h"
 #include "blueprint.h"
 
-std::map<std::string, int16_t> create_label_map(std::vector<std::string> &tokens) {
-        std::map<std::string, int16_t> symbols = {};
-        std::vector<std::string> filtered_tokens = {}; // remove label definitions
-        size_t program_addr = 0;
-        for (std::string curr_token: tokens) {
-                if (curr_token.back() != ':') {
-                        filtered_tokens.push_back(curr_token);
-                        program_addr++;
+std::map<std::string, int16_t> create_label_map(
+        const std::vector<Token> tokens
+) {
+        std::map<std::string, int16_t> label_map;
+        for (int16_t prog_addr = 0; prog_addr < (int16_t)tokens.size(); ++prog_addr) {
+                Token curr_token = tokens.at(prog_addr);
+                if (curr_token.type != T_LABEL_DEF)
                         continue;
-                }
-                curr_token.pop_back();
-                // if symbol has been defined, redefine but put out a warning
-                if (symbols.find(curr_token) == symbols.end()) {
-                        symbols.insert({curr_token, (int16_t)program_addr});
-                } else {
-                        std::cout << "Warning: " << curr_token;
-                        std::cout << " is defined more than once, and will ";
-                        std::cout << "take the newest definition\n";
-                        symbols[curr_token] = (int16_t)program_addr;
-                }
+                std::string label_name = curr_token.data;
+                // remove colon
+                label_name = label_name.substr(0, label_name.length()-1);
+                label_map.insert({label_name, prog_addr});
         }
-        tokens.swap(filtered_tokens);
-        return symbols;
+        return label_map;
+}
+
+
+Debug_Info_2 grammar_check_2(
+        const std::vector<Token> tokens,
+        const std::map<std::string, int16_t> label_map
+) {
+        Debug_Info_2 context;
+        context.grammar_retval = ACCEPTABLE_E;
+        // ensure main definition exists
+        if (label_map.find("main") == label_map.end()) {
+                context.grammar_retval = MISSING_MAIN_E;
+                context.line_num = -1;
+                return context;
+        }
+
+        bool seen_exit = false;
+        size_t token_idx = 0;
+        while (token_idx < tokens.size()) {
+                Token first_token = tokens.at(token_idx);
+                if (first_token.type != T_MNEMONIC) {
+                        // expected mnemonic
+                        context.grammar_retval = EXPECTED_MNEMONIC_E;
+                        context.line_num = first_token.line_num;
+                        context.relevant_token = first_token;
+                        return context;
+                }
+                if (BLUEPRINTS.find(first_token.data) == BLUEPRINTS.end()) {
+                        // mnemonic not recognized
+                        context.grammar_retval = UNKNOWN_MNEMONIC_E;
+                        context.line_num = first_token.line_num;
+                        context.relevant_token = first_token;
+                        return context;
+                }
+                if (first_token.data == "EXIT")
+                        seen_exit = true;
+
+                std::vector<Atom_Type> curr_blueprint = BLUEPRINTS.at(first_token.data);
+                // check if there are enough tokens
+                if (token_idx + curr_blueprint.size() > tokens.size()) {
+                        // expected arguments
+                        context.grammar_retval = MISSING_ARGUMENTS_E;
+                        context.line_num = first_token.line_num;
+                        context.relevant_token = first_token;
+                        return context;
+                }
+
+                for (int arg_idx = 1; arg_idx < (int)curr_blueprint.size(); arg_idx++) {
+                        // check each atom for correctness
+                        Token curr_token = tokens.at(token_idx + arg_idx);
+                        // to prevent mnemonic consumption causing missing exit
+                        if (curr_token.type == T_MNEMONIC) {
+                                context.grammar_retval = MISSING_ARGUMENTS_E;
+                                context.line_num = first_token.line_num;
+                                context.relevant_token = first_token;
+                                return context;
+                        }
+                        bool atom_check_res = false;
+                        bool type_check_res = false;
+                        switch (curr_token.type) {
+                        case T_INTEGER_LIT:
+                                atom_check_res = is_valid_atom(LITERAL_INT, curr_token.data);
+                                type_check_res = curr_blueprint.at(arg_idx) == LITERAL_INT;
+                                break;
+                        case T_LABEL_DEF: /* filtered out*/
+                                break;
+                        case T_LABEL_REF:
+                                atom_check_res = label_map.find(curr_token.data) != label_map.end();
+                                type_check_res = curr_blueprint.at(arg_idx) == LABEL;
+                                break;
+                        case T_MNEMONIC: /* filtered out */
+                                break;
+                        case T_REGISTER:
+                                // checks specifically for generic registers
+                                atom_check_res = is_valid_atom(REGISTER, curr_token.data);
+                                type_check_res = curr_blueprint.at(arg_idx) == REGISTER;
+                                break;
+                        case T_STACK_OFF:
+                                atom_check_res = is_valid_atom(STACK_OFFSET, curr_token.data);
+                                type_check_res = curr_blueprint.at(arg_idx) == STACK_OFFSET;
+                                break;
+                        case T_STRING_LIT:
+                                atom_check_res = is_valid_atom(LITERAL_STR, curr_token.data);
+                                type_check_res = curr_blueprint.at(arg_idx) == LITERAL_STR;
+                                break;
+                        default: /* impossible */
+                                break;
+                        }
+                        // ensure SOURCE types work properly
+                        if (curr_blueprint.at(arg_idx) == SOURCE) {
+                                atom_check_res = is_valid_atom(SOURCE, curr_token.data);
+                                type_check_res =
+                                        (curr_token.type == T_INTEGER_LIT)
+                                        || (curr_token.type == T_REGISTER)
+                                        || (curr_token.type == T_STACK_OFF);
+                        }
+                        if (!(atom_check_res && type_check_res)) {
+                                context.grammar_retval = INVALID_ATOM_E;
+                                context.line_num = first_token.line_num;
+                                context.relevant_token = curr_token;
+                                return context;
+                        }
+                }
+                token_idx += curr_blueprint.size();
+        }
+
+        // sure exit instruction exists
+        if (!seen_exit) {
+                context.grammar_retval = MISSING_EXIT_E;
+                context.line_num = -1;
+        }
+        return context;
 }
 
 bool is_valid_atom(const Atom_Type atom_type, const std::string token) {
         bool first, second;
         std::string stripped_token;
         switch (atom_type) {
-        case LABEL:
-                // easier to check in later function call
+        case LABEL: /* checked earlier to avoid adding label_map as parameter */
                 return true;
         case LITERAL_INT:
                 if (token.front() != '$')
@@ -83,8 +186,6 @@ bool is_valid_i16(const std::string token) {
                 return false;
         return true;
 }
-
-
 
 Debug_Info grammar_check(
         const std::vector<std::string> tokens,

@@ -21,8 +21,9 @@ multiple statements on a single line will not cause an error.
 # Registers
 Registers are the quickest way of handling data in an assembly language
 In PAL, you get 8 general purpose registers to freely read and write to:
-RA, RB, RC, ..., RH. Each of which stores a 16 bit signed integer
-(Max: 32767, Min: -32768).
+RA, RB, RC, ..., RH. Each of which stores a 16 bit signed integer, but
+due to bits 14, 13, and 12 being reserved for addressing modes, values
+will be clamped to \[-4096, 4096\].
 
 You also have access to some read only registers: RSP, the stack pointer;
 RIP, the instruction pointer; and CMP0 and CMP1, the comparison registers used
@@ -33,14 +34,17 @@ All registers, with the exception of RIP, are guarenteed to be set to 0 at
 the start of the program.
 
 # Memory
-In this simulator, you are given 2048 integers of memory outside of integers
+In this simulator, you are given 8291 integers of memory outside of integers
 to work with. This memory is split into the RAM, which takes up the first 3/4
-of that space (1536 integers), and the stack, which takes up the last 1/4 of
-the space (512 integers). The RAM can be freely written and read from,
+of that space (6144 integers), and the stack, which takes up the last 1/4 of
+the space (2048 integers). The RAM can be freely written and read from,
 provided an address within the RAM space. The stack can only have values
 pushed to the top of the stack, but can be read from either the top of the
 stack, or from an offset from the top of the stack. The stack has a dedicated
 register RSP, the stack pointer, which points to the top of the stack.
+
+Every element of the RAM, including the stack, is guarenteed to be set to 0
+at the start of the program.
 
 # Labels
 To define a label, you write a series of characters, followed by a colon (:).
@@ -88,7 +92,7 @@ two escaped characters: the double quote, and the newline. Null terminators
 are automatically included in string, and as such have no escape character.
 
 Every program is required to have at least one instance of the EXIT
-instruction. Failing to do so causes an assembler error.
+instruction, or the program will refuse to assemble.
 
 | **Mnemonic** | **Arg 1** | **Arg 2**  | **Arg 3** | **Pseudocode**             |
 |--------------|-----------|------------|-----------|----------------------------|
@@ -136,11 +140,12 @@ tedious. For ease of programming, two other addressing modes are provided.
 %N will return the Nth element from the top of the stack, where %0 returns the
 top of the stack (the same value as using POP). %N is a read only operation,
 meaning it will not pop the value used, nor affect the program.
-N must be a positive value within the bounds of an i16, or a runtime error will occur.
+N must be a positive value within the value of 0 and the stack_ptr,
+or a runtime error will occur.
 
 ## Literal addressing: $N
 $N will return the literal value N, which may be any i16. N must be a valid
-i16, or an assembler error will occur.
+i16 in the bounds of \[-4096, 4096\], or an assembler error will occur.
 
 # Program flags
 Certain command line flags are provided to the program executable to make

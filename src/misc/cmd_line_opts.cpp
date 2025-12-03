@@ -7,35 +7,36 @@ Cmd_Options::Cmd_Options() {
         assemble_only         = false;
         executable_help       = false;
         input_file_idx        = -1;
-        is_binary_input       = false;
         intermediate_files    = false;
-        is_debug         = false;
+        is_binary_input       = false;
+        is_debug              = false;
 }
 
 /* auxiliary function to handle command line arguments
  misc: doesn't rust's cargo have a package for cmd parsing? */
-bool Cmd_Options::handle_cmd_args(const int argc, char ** const argv) {
+void Cmd_Options::store_cmd_args(const int argc, char ** const argv) {
         if (argc < 2)
-                return true;
+                return;
         for (int i = 1; i < argc; ++i) {
                 std::string curr_arg = argv[i];
-                if (curr_arg == "-a" || curr_arg == "--assemble-only") {
+                if (curr_arg == "-a" || curr_arg == "--assemble-only") 
                         assemble_only = true;
-                } else if (curr_arg == "-b" || curr_arg == "--binary-input") {
+                else if (curr_arg == "-b" || curr_arg == "--binary-input") 
                         is_binary_input = true;
-                } else if (curr_arg == "-h" || curr_arg == "--help") {
+                else if (curr_arg == "-h" || curr_arg == "--help") 
                         executable_help = true;
-                } else if (curr_arg == "-s" || curr_arg == "--save-temps") {
+                else if (curr_arg == "-s" || curr_arg == "--save-temps") 
                         intermediate_files = true;
-                } else if (curr_arg == "-d" || curr_arg == "--debug") {
+                else if (curr_arg == "-d" || curr_arg == "--debug") 
                         is_debug = true;
-                } else if (curr_arg[0] == '-') {
+                else if (curr_arg[0] == '-') 
                         std::cout << "Unrecognized option: " << curr_arg << "\n";
-                        return false;
-                } else {
+                else 
                         input_file_idx = i;
-                }
         }
+}
+
+bool Cmd_Options::is_valid_args() {
         // combination of flags that are either incompatible or
         // cause an early return
         if (executable_help) {

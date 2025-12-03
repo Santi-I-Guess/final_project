@@ -1,83 +1,112 @@
 #include <cctype>
-#include <cstdint>
 #include <cstddef>
 #include <vector>
 #include <string>
 
+#include "../common_values.h"
 #include "tokenizer.h"
 
-std::vector<std::string> create_tokens(const std::string source_buffer) {
-        std::vector<std::string> tokens = {};
+std::vector<Token> create_tokens(const std::string source_buffer) {
+        std::vector<Token> tokens = {};
         size_t buff_idx = 0;
-        size_t buff_len = source_buffer.length();
+        size_t buff_len = source_buffer.size();
+        int line_num = 1;
+        // line_num should increase only if it's in the same step that
+        //      mutates buff_idx or token_idx
         while (buff_idx < buff_len) {
-                skip_whitespace(buff_idx, source_buffer);
+        next_lexeme:
+                char curr = source_buffer[buff_idx];
+                // increase buff_idx until not on whitespace
+                while (buff_idx < buff_len) {
+                        curr = source_buffer[buff_idx];
+                        if (isspace(curr)) {
+                                if (curr == '\n')
+                                        line_num++;
+                                buff_idx++;
+                        } else {
+                                break;
+                        }
+                }
                 if (buff_idx == buff_len)
                         return tokens;
-                size_t token_len = 0;
-                std::string curr_token = "";
-                char first_char = source_buffer[buff_idx];
-                switch (first_char) {
-                case ';':
-                        skip_comment(buff_idx, source_buffer);
+                // increase buff_idx until not on a comment
+                if (curr == ';') {
+                        while (buff_idx < buff_len) {
+                                curr = source_buffer[buff_idx];
+                                buff_idx++;
+                                if (curr == '\n') {
+                                        line_num++;
+                                        break;
+                                }
+                        }
                         if (buff_idx == buff_len)
                                 return tokens;
-                        break;
-                default:
-                        token_len = get_token_len(buff_idx, source_buffer);
-                        // prevent unterminated quotes or symbosl that
-                        // go to EOF from becoming tokens
-                        if (token_len == SIZE_MAX)
-                                return tokens;
-                        curr_token = source_buffer.substr(buff_idx, token_len);
+                        goto next_lexeme;
+                }
+                size_t token_len = 0;
+                if (curr == '\"') {
+                        // if token is a string
+                        token_len++;
+                        bool skip_quote = false;
+                        while (((buff_idx + token_len) < buff_len)) {
+                                curr = source_buffer[buff_idx + token_len];
+                                if (curr == '\n')
+                                        break;
+                                token_len++;
+                                if (curr == '\"' && !skip_quote)
+                                        break;
+                                skip_quote = false;
+                                // to allow for escaped quotes
+                                if (curr == '\\')
+                                        skip_quote = true;
+                        }
+                        if (buff_idx == buff_len)
+                                break;
+                        Token curr_token;
+                        curr_token.data = source_buffer.substr(buff_idx, token_len);
+                        curr_token.type = T_STRING_LIT;
+                        curr_token.line_num = line_num;
                         tokens.push_back(curr_token);
                         buff_idx += token_len;
-                        break;
-                }
-                buff_idx++;
-        }
-        tokens.shrink_to_fit();
-        return tokens;
-}
-
-size_t get_string_token_length(const size_t i, const std::string source_buffer) {
-        size_t token_len = 1, buff_len = source_buffer.length();
-        bool escaped_quote = false;
-        while (i + token_len < buff_len) {
-                char curr = source_buffer.at(i + token_len);
-                // see @details
-                if (curr == '\n')
-                        return SIZE_MAX;
-                token_len++;
-
-                // ensure escaped quotes are included in token
-                if (curr == '\"' && !escaped_quote)
-                        break;
-                escaped_quote = false;
-                if (curr == '\\')
-                        escaped_quote = true;
-        }
-        if (i + token_len == buff_len)
-                return SIZE_MAX;
-        return token_len;
-}
-
-size_t get_token_len(const size_t i, const std::string source_buffer) {
-        size_t token_len = 1;
-        size_t buff_len = source_buffer.length();
-        if (source_buffer.at(i) == '\"')
-                return get_string_token_length(i, source_buffer);
-        while (i + token_len < buff_len) {
-                char curr = source_buffer[i + token_len];
-                if (is_identifier_char(curr))
+                } else if (is_identifier_char(source_buffer[buff_idx])) {
+                        // if token is normal
                         token_len++;
-                else
-                        break;
+                        while (((buff_idx + token_len) < buff_len) && (curr != '\n')) {
+                                curr = source_buffer[buff_idx + token_len];
+                                if (is_identifier_char(curr))
+                                        token_len++;
+                                else
+                                        break;
+                        }
+                        if (buff_idx == buff_len)
+                                break;
+                        Token curr_token;
+                        curr_token.data = source_buffer.substr(buff_idx, token_len);
+                        curr_token.type = T_MNEMONIC; // default type
+                        curr_token.line_num = line_num;
+                        for (size_t i = 0; i < curr_token.data.length(); ++i) {
+                                if (!isupper(curr_token.data.at(i)))
+                                        curr_token.type = T_LABEL_REF;
+                        }
+                        if (curr_token.data.front() == '$')
+                                curr_token.type = T_INTEGER_LIT;
+                        else if (curr_token.data.front() == '%')
+                                curr_token.type = T_STACK_OFF;
+                        else if (curr_token.data.back() == ':')
+                                curr_token.type = T_LABEL_DEF;
+                        else if (REGISTER_TABLE.find(curr_token.data) != REGISTER_TABLE.end())
+                                curr_token.type = T_REGISTER;
+                        else if (curr_token.type != T_MNEMONIC)
+                                curr_token.type = T_LABEL_REF;
+                        tokens.push_back(curr_token);
+                        buff_idx += token_len;
+                } else {
+                        // skip undesired character, like commas
+                        buff_idx++;
+                }
         }
-        if (i + token_len == buff_len)
-                return SIZE_MAX;
-        return token_len;
-}
+        return tokens;
+};
 
 bool is_identifier_char(const char i) {
         if (i == '$' || i == '%' || i == ':' || i == '_' || i == '-')
@@ -86,23 +115,3 @@ bool is_identifier_char(const char i) {
                 return true;
         return false;
 } 
-
-void skip_comment(size_t &i, const std::string source_buffer) {
-        size_t buff_len = source_buffer.length();
-        while (i < buff_len) {
-                if (source_buffer[i] != '\n')
-                        i++;
-                else
-                        break;
-        }
-}
-
-void skip_whitespace(size_t &i, const std::string source_buffer) {
-        size_t buff_len = source_buffer.length();
-        while (i < buff_len) {
-                if (isspace(source_buffer[i]))
-                        i++;
-                else
-                        break;
-        }
-}

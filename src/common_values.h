@@ -9,13 +9,13 @@
  * @brief enum for atom (a.k.a. argument) type
  */
 enum Atom_Type {
-        LABEL        = 1,
-        LITERAL_INT  = 1 << 1,
-        LITERAL_STR  = 1 << 2,
-        MNEMONIC     = 1 << 3,
-        REGISTER     = 1 << 4,
-        SOURCE       = 1 << 5, // LITERAL_INT | REGISTER | STACK_OFFSET
-        STACK_OFFSET = 1 << 6,
+        LABEL,
+        LITERAL_INT,
+        LITERAL_STR,
+        MNEMONIC,
+        REGISTER,
+        SOURCE,       // LITERAL_INT | REGISTER | STACK_OFFSET
+        STACK_OFFSET,
 };
 
 // many values between Grammar_Retval and Assembler_Retval are only
@@ -60,15 +60,6 @@ struct Debug_Info {
         std::vector<std::string> relevant_tokens;  ///< any relevant tokens
         Grammar_Retval           grammar_retval;   ///< blueprint error
         Assembler_Retval         assembler_retval; ///< translation error
-};
-
-/**
- * @brief contiaer struct for syntax and semantic errors
- */
-struct Debug_Info_2 {
-        int line_num;
-        std::string line;
-        std::string message;
 };
 
 /**
