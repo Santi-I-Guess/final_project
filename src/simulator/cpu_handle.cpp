@@ -1,11 +1,18 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <iostream>
-#include <limits>
 #include <string>
 #include <sstream>
 #include <vector>
+
+#ifdef _WIN32
+#include <cstdio>
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "../common_values.h"
 #include "cpu_handle.h"
@@ -232,11 +239,29 @@ void CPU_Handle::run_program_debug() {
 
         prog_ctr = get_program_data(4);
 
+#ifdef _WIN32
+        bool is_piped_input = !_isatty(_fileno(stdin));
+        std::ifstream terminal("CONIN$");
+#else
+        bool is_piped_input = !isatty(STDIN_FILENO);
+        std::ifstream terminal("/dev/tty");
+#endif
+        if (terminal.fail()) {
+                std::cerr << "Failed to open terminal device\n";
+                std::exit(1);
+        }
+
+
         // pause when no more instructions
         while (!hit_exit) {
                 std::cout << "(PalDB) > ";
-                std::string command;
-                std::getline(std::cin, command);
+                std::cout.flush();
+                std::string command = "";
+                if (is_piped_input) {
+                        std::getline(terminal, command);
+                } else {
+                        std::getline(std::cin, command);
+                }
 
                 // tokenize command
                 std::vector<std::string> cmd_tokens;
@@ -299,8 +324,7 @@ void CPU_Handle::run_program_debug() {
                         continue;
                 } else if (cmd_tokens.front()[0] == 'q') {
                         // quit
-                        break;
-                        continue;
+                        return;
                 } else {
                         std::cout << "unrecognized command\n";
                         continue;
@@ -350,6 +374,7 @@ void CPU_Handle::run_program_debug() {
                         previously_ran = false;
                 }
         }
+        terminal.close();
 }
 
 

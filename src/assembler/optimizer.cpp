@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstdint>
 #include <iostream>
 #include <vector>
@@ -288,8 +289,12 @@ int16_t get_folded_value(
         const int16_t arg_2
 ) {
         int16_t target_value = 0;
-        int16_t value_1 = arg_1 ^ (int16_t)(1 << 14);
-        int16_t value_2 = arg_2 ^ (int16_t)(1 << 14);
+        int16_t value_1 = arg_1;
+        int16_t value_2 = arg_1;
+        if (arg_1 >= 0)
+                value_1 = arg_1 ^ (int16_t)(1 << 14);
+        if (arg_2 >= 0)
+                value_1 = arg_2 ^ (int16_t)(1 << 14);
         if (opcode == (int16_t)ADD) {
                 target_value = value_1 + value_2;
         } else if (opcode == (int16_t)SUB) {
@@ -297,6 +302,10 @@ int16_t get_folded_value(
         } else if (opcode == (int16_t)MUL) {
                 target_value = value_1 * value_2;
         } else if (opcode == (int16_t)DIV) {
+                if (value_2 == 0) {
+                        value_1 = 0;
+                        value_2 = 1;
+                }
                 target_value = value_1 / value_2;
         } else if (opcode == (int16_t)MOD) {
                 target_value = value_1 % value_2;
@@ -315,6 +324,6 @@ int16_t get_folded_value(
                 target_value = -4096;
         if (target_value > 4096)
                 target_value = 4096;
-        target_value |= (int16_t)(1 << 14); // apply bitmask
+        target_value |= (int16_t)(1 << 14); // apply literal bitmask
         return target_value;
 }
