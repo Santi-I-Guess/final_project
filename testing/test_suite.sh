@@ -5,7 +5,9 @@ set -o nounset
 # using stdin mode of final_project to see if input is expected
 # all checks here should result in expected output, and no errors
 
-executable="../final_project -o -d"
+cd "$(dirname ${0})" || exit
+
+executable="../final_project"
 
 print_check() {
     printf "\x1b[32mPrint Check:\x1b[0m\n"

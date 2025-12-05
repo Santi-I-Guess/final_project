@@ -43,23 +43,27 @@ registers = ["RA", "RB", "RC", "RD",
 #       is for string offsets, and 1 << 12 is for string, that means I only
 #       have 12 bits for number range.
 
+max_value = 16383
+min_value = -16383
+
 
 def clamp(result) -> int:
     if abs(result) < 1:
         result = 0
-    elif result > 4096:
-        return 4096
-    elif result < -4096:
-        return -4096
+    elif result > max_value:
+        return max_value
+    elif result < min_value:
+        return min_value
     return result
-
 
 if __name__ == "__main__":
     print("main:")
     for i in range(32):
         operation = random.choice(MNEMONICS_LIST)
-        arg_1 = int(random.triangular(-4096, 4095))
-        arg_2 = int(random.triangular(-4096, 4095))
+        # arg_1 = int(random.triangular(min_value, max_value))
+        # arg_2 = int(random.triangular(min_value, max_value))
+        arg_1 = int(random.triangular(min_value, max_value))
+        arg_2 = int(random.triangular(min_value, max_value))
         if operation == "ADD":
             result = arg_1 + arg_2
             result = clamp(result)
@@ -133,4 +137,4 @@ if __name__ == "__main__":
             print(f"    {operation} RA, ${arg_1:<6}, ${arg_2:<6}")
         print("    PRINT RA")
         print("    CPRINT $10")
-    print("    EXIT")
+    print("    EXIT ")

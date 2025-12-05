@@ -78,3 +78,4 @@ if __name__ == "__main__":
             print_ins(curr_ins, max_sizes)
             print(f"; ins #{ins_num}")
             ins_num += 1
+    print("")

@@ -95,7 +95,19 @@ void ins_mul(CPU_Handle &cpu_handle) {
         int16_t raw_3 = cpu_handle.get_program_data(prog_ctr + 3);
         int16_t src_1 = cpu_handle.dereference_value(raw_2);
         int16_t src_2 = cpu_handle.dereference_value(raw_3);
-        int16_t value = src_1 * src_2;
+        // ensure 16 bit overflow keeps the right sign before clamp
+        bool expected_positive = (src_1 >= 0) == (src_2 >= 0);
+        int32_t raw_value = src_1 * src_2;
+        if (raw_value < 0 && expected_positive)
+                raw_value *= -1;
+        else if (raw_value > 0 && !expected_positive)
+                raw_value *= -1;
+        // ensure 16 bit overflow clamps to expected value
+        if (raw_value > LIT_MAX_VALUE)
+                raw_value = LIT_MAX_VALUE;
+        else if (raw_value < LIT_MIN_VALUE)
+                raw_value = LIT_MIN_VALUE;
+        int16_t value = (int16_t)raw_value;
         update_register(cpu_handle, dest, value);
         prog_ctr += 4;
 }
