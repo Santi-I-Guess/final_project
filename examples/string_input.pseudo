@@ -1,0 +1,26 @@
+main:
+    PUSH RSP
+    SINPUT
+    ; calculate length
+    MOV RA, RSP
+    SUB RA, %0
+    DEC RA ; stack ptr logic
+    DEC RA ; null terminator
+    SPRINT "Your line was "
+    PRINT RA
+    SPRINT " characters long\n"
+
+    ; move RSP to beginning of string
+    ; keep printing while the top stack element is not 0
+    ; RA is the string size
+    SUB RSP, RA
+    CPRINT $34 ; '"'
+next_letter:
+    CPRINT %0
+    CMP %0, $0
+    INC RSP
+    JNE next_letter
+    INC RSP ; move past null terminator
+    CPRINT $34 ; '"'
+    CPRINT $10
+    EXIT

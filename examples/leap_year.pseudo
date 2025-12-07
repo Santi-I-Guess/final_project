@@ -1,0 +1,44 @@
+; calculate leap year based on user input
+main:
+    ; RA as temp variable, %0 as input
+    SPRINT "Enter a year: "
+    INPUT
+
+    WRITE %0, $1 ; put input into ram address 1
+    MOV RA, %0
+    MOD RA, $400
+    WRITE RA, $2 ; put % 400 result in $2
+    MOV RA, %0
+    MOD RA, $100
+    WRITE RA, $3 ; put % 100 result in $3
+    MOV RA, %0
+    MOD RA, $4
+    WRITE RA, $4 ; put %4 result in $4
+
+    ; if div by 400 and 100
+    READ RA, $2 ; result of INPUT % 400
+    READ RB, $3 ; result of INPUT % 100
+    MOV RC, RA
+    OR RC, RB
+    CMP RC, $0         ; check if the sum of their mods are 0
+    JEQ is_leap_year
+
+    CMP RB, $0
+    JEQ not_leap_year
+
+    READ RA, $4 ; result of INPUT % 4
+    CMP RA, $0
+    JEQ is_leap_year
+not_leap_year:
+    READ RA, $1 ; the original input
+    PRINT RA
+    SPRINT " is not a leap year\n"
+    JMP final
+is_leap_year:
+    READ RA, $1 ; the original input
+    PRINT RA
+    SPRINT " is a leap year\n"
+    JMP final
+final:
+    EXIT
+

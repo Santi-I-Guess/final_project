@@ -1,0 +1,25 @@
+; print the lowercase and uppercase alphabet
+print_alphabet:
+    ; RA is the value, RB is the bounds
+    POP RA
+    MOV RB, RA
+    ADD RB, $26
+again_1:
+    ; CPRINT prints the ascii character of the value provided
+    ; also useful for printing spaces ($32) and newlines ($10)
+    CPRINT RA
+    INC RA
+    CMP RA, RB
+    JGE next_1
+    SPRINT " "
+    JLS again_1
+next_1:
+    SPRINT "\n"
+    RET
+
+main:
+    PUSH $97
+    CALL print_alphabet
+    PUSH $65
+    CALL print_alphabet
+    EXIT

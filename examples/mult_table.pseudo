@@ -1,0 +1,46 @@
+; print multiplication table, 2-10
+align_right:
+    ; assume 1-3 digits
+    CMP %0, $10    JLS one_digit
+    CMP %0, $100   JLS two_digits
+    JMP align_right_final
+one_digit:
+    CPRINT $32 ; space
+    CPRINT $32 ; space
+    JMP align_right_final
+two_digits:
+    CPRINT $32
+    JMP align_right_final
+align_right_final:
+    PRINT %0
+    CPRINT $124
+    POP RZ ; dump parameter
+    RET
+
+print_row:
+    ; RA as current multiple value, RB as ctr
+    MOV RB, $1
+    print_loop:
+    MOV RA, %0
+    MUL RA, RB
+    PUSH RA
+    CALL align_right
+    CPRINT $32 ; space
+    INC RB
+    CMP RB, $11
+    JLS print_loop
+    CPRINT $10 ; newline
+    RET
+
+main:
+    ; RA as both value and ctr
+    SPRINT "Multiplication tables 2-10\n"
+    MOV RA, $2
+    main_loop:
+    PUSH RA
+    CALL print_row
+    POP RA
+    INC RA
+    CMP RA, $11
+    JLS main_loop
+    EXIT

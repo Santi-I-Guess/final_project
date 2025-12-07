@@ -1,0 +1,69 @@
+check_value:
+    ; %0 is value, %1 is row or columm (0|1)
+    CMP %0, $0
+    JLS bad
+    POP RZ ; dump parameters
+    POP RZ
+    RET
+bad:
+    PRINT %0
+    SPRINT " is not a valid "
+    CMP %1, $0
+    JNE column_bad
+    SPRINT "row number\n"
+    EXIT
+column_bad:
+    SPRINT "column number\n"
+    EXIT 
+
+print_row:
+    MOV RA, $0
+print_row_again:
+    CPRINT [$2]
+    INC RA
+    CMP RA, [$0]
+    JLS print_row_again
+    CPRINT $10
+    RET
+
+main:
+    SPRINT "Enter num rows: "
+    INPUT
+    MOV RA, %0
+    SPRINT "Enter num columns: "
+    INPUT
+    MOV RB, %0
+    SPRINT "Enter a fill character: "
+    INPUT
+    MOV RC, %0
+
+    ; store numbers in RAM
+    WRITE RA, $0 ; rows in $0
+    WRITE RB, $1 ; columns in $1
+    WRITE RC, $2 ; char in $2
+
+    ; check bounds
+    PUSH $0
+    PUSH RA
+    CALL check_value
+    PUSH $1
+    PUSH RB
+    CALL check_value
+
+    SPRINT "-> will print "
+    PRINT [$0]
+    CPRINT $88
+    PRINT [$1]
+    SPRINT " grid\n"
+
+    ; RA as ctr
+    MOV RA, $0
+again:
+    PUSH RA ; save RA between calls
+    CALL print_row
+    POP RA
+    INC RA
+    CMP RA, [$1]
+    JLS again
+
+    EXIT

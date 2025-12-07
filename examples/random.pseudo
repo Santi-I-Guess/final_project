@@ -1,0 +1,11 @@
+main:
+    RAND
+    RAND
+    RAND
+    PRINT %0
+    CPRINT $10
+    PRINT %1
+    CPRINT $10
+    PRINT %2
+    CPRINT $10
+    EXIT

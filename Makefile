@@ -5,6 +5,7 @@ CXXFLAGS_DEBUG = -g
 CXXFLAGS_WARN  = -Wall -Werror -Wextra -Wconversion -Wdouble-promotion \
 				 -Wunreachable-code -Wshadow -Wpedantic
 CPPVERSION = -std=c++17
+USERNAME = santiago_sagastegui
 
 ARCHIVE_EXTENSION = zip
 
@@ -38,12 +39,11 @@ SRC_FILES = $(foreach dir, $(SRC_DIRS), $(wildcard ${dir}/*.cpp))
 H_FILES   = $(foreach dir, $(SRC_DIRS), $(wildcard ${dir}/*.h))
 OBJECTS = $(patsubst %.cpp, build/%.o, $(notdir $(SRC_FILES)))
 REZ_FILES = resources/pseudo_assembly_assembler.png \
-			Doxyfile \
+			docs/Doxyfile \
 			$(wildcard docs/*.md) \
-			$(wildcard examples/*) \
-			$(wildcard *.py) \
-			$(wildcard *.sh) \
-USERNAME  = santiago_sagastegui
+			$(wildcard examples/*.pseudo) \
+			$(wildcard testing/*.py) \
+			$(wildcard testing/*.sh) \
 
 # https://www.gnu.org/software/make/manual/html_node/File-Name-Functions.html
 
