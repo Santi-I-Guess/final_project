@@ -32,8 +32,12 @@ main:
     MOV RA, %0
     SPRINT "Enter num columns: "
     INPUT
-    MOV RB, %0
-    ; RA is rows, RB is columns
+    MOV RB, %1
+    ; store numbers in RAM
+    WRITE %1, $0 ; rows in $0
+    WRITE %0, $1 ; columns in $1
+
+    ; check bounds
     PUSH $0
     PUSH RA
     CALL check_value
@@ -41,10 +45,11 @@ main:
     PUSH RB
     CALL check_value
 
-    SPRINT "will print "
-    PRINT RA
+    ; $0 is number of rows, $1 is number of columns
+    SPRINT "-> will print "
+    PRINT [$0]
     CPRINT $88
-    PRINT RB
+    PRINT [$1]
     SPRINT " grid\n"
 
     EXIT

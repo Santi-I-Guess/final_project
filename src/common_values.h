@@ -1,17 +1,17 @@
 #ifndef COMMON_VALUES_H
 #define COMMON_VALUES_H 1
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 // stack size last 1/4 of the RAM
-#define RAM_SIZE 3000
-#define STACK_START 2250
-#define STACK_SIZE 750
-#define CALL_STACK_SIZE 2014
-#define LIT_MIN_VALUE -16383
-#define LIT_MAX_VALUE 16383
+#define RAM_SIZE          3000
+#define STACK_START       2250
+#define STACK_SIZE         750
+#define CALL_STACK_SIZE   2014
+#define LIT_MIN_VALUE   -16383
+#define LIT_MAX_VALUE    16383
 
 /**
  * @brief enum for atom (a.k.a. argument) type
@@ -21,8 +21,9 @@ enum Atom_Type {
         LITERAL_INT,
         LITERAL_STR,
         MNEMONIC,
+        RAM_ADDR,
         REGISTER,
-        SOURCE,       // LITERAL_INT | REGISTER | STACK_OFFSET
+        SOURCE,       // LITERAL_INT | REGISTER | STACK_OFFSET | RAM_ADDR
         STACK_OFFSET,
 };
 
@@ -34,6 +35,7 @@ enum Token_Type {
         T_LABEL_DEF,
         T_LABEL_REF,
         T_MNEMONIC,
+        T_RAM_ADDR,
         T_REGISTER,
         T_STACK_OFF,
         T_STRING_LIT,
@@ -48,6 +50,7 @@ struct Token {
         Token_Type type;  ///< type of the token
         std::string data; ///< the data
 };
+
 
 /**
  * @brief stores all relevant information of an instruction in one place

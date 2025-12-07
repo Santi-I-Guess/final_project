@@ -28,6 +28,8 @@ void generate_intermediate_file(
                         sink_file << "label definition"; break;
                 case T_LABEL_REF:
                         sink_file << "label reference";  break;
+                case T_RAM_ADDR:
+                        sink_file << "ram addr";         break;
                 case T_MNEMONIC:
                         sink_file << "mnemonic";         break;
                 case T_REGISTER:

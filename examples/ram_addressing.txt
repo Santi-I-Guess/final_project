@@ -1,0 +1,24 @@
+
+main:
+    WRITE $10, $0
+    WRITE $9, $1
+    WRITE $8, $2
+    WRITE $7, $3
+    WRITE $6, $4
+    SPRINT "[$0] is "
+    PRINT [$0]
+    CPRINT $10
+    SPRINT "[$1] is "
+    PRINT [$1]
+    CPRINT $10
+    SPRINT "[$2] is "
+    PRINT [$2]
+    CPRINT $10
+    SPRINT "[$3] is "
+    PRINT [$3]
+    CPRINT $10
+    SPRINT "[$4] is "
+    PRINT [$4]
+    CPRINT $10
+
+    EXIT

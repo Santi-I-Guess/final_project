@@ -14,7 +14,8 @@
 #include <string>
 #include <sstream>
 
-#include "assembler/synthesis.h"
+#include "assembler/assembler.h"
+#include "assembler/tokenizer.h"
 #include "common_values.h"
 #include "misc/cmd_line_opts.h"
 #include "misc/file_handling.h"

@@ -60,6 +60,8 @@ BLUEPRINTS_MAP: dict[str, list] = {
     "SPRINT": [MNEMONIC, LITERAL_STR],
     "CPRINT": [MNEMONIC, SOURCE],
     "INPUT":  [MNEMONIC],
+    "SINPUT": [MNEMONIC],
+    "RAND":   [MNEMONIC],
     "EXIT":   [MNEMONIC]
 }
 

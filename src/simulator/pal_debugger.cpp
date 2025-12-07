@@ -182,13 +182,14 @@ void pdb_handle_print(
                 {"RSP", &cpu_handle.stack_ptr}, {"RIP", &cpu_handle.prog_ctr}
         };
 
-        if (cmd_tokens.at(1).at(0) == '%') {
+        std::string requested = cmd_tokens.at(1);
+        if (requested.at(0) == '%') {
                 // stack offset: expect %num
                 std::string temp = "";
-                for (size_t i = 1; i < cmd_tokens.at(1).length(); i++) {
-                        if (!isdigit(cmd_tokens.at(1).at(i)))
+                for (size_t i = 1; i < requested.length(); i++) {
+                        if (!isdigit(requested.at(i)))
                                 break;
-                        temp += cmd_tokens.at(1).at(i);
+                        temp += requested.at(i);
                 }
                 if (temp.empty()) {
                         std::cout << "No valid value provided to offset\n";
@@ -198,17 +199,17 @@ void pdb_handle_print(
                 if (value < 0 || value >= cpu_handle.stack_ptr) {
                         std::cout << "Cannot access stack with offset outside [0,stack_ptr - 1]\n";
                 } else {
-                        std::cout << cmd_tokens.at(1) << " = ";
+                        std::cout << requested << " = ";
                         // CPU_Handle see dereference_value
                         std::cout << cpu_handle.program_mem[STACK_START + cpu_handle.stack_ptr - value - 1] << "\n";
                 }
-        } else if (cmd_tokens.at(1).at(0) == 'M') {
-                // mem address: expect MEM[num]
+        } else if (requested.at(0) == '[') {
+                // mem address: expect [%num]
                 std::string temp = "";
-                for (size_t i = 4; i < cmd_tokens.at(1).length(); i++) {
-                        if (!isdigit(cmd_tokens.at(1).at(i)))
+                for (size_t i = 2; i < requested.length(); i++) {
+                        if (!isdigit(requested.at(i)))
                                 break;
-                        temp += cmd_tokens.at(1).at(i);
+                        temp += requested.at(i);
                 }
                 if (temp.empty()) {
                         std::cout << "No valid value provided to address\n";
@@ -218,13 +219,13 @@ void pdb_handle_print(
                 if (value < 0 || value >= STACK_START) {
                         std::cout << "Cannot access mem value outside [0," << STACK_SIZE << "]\n";
                 } else {
-                        std::cout << cmd_tokens.at(1) << " = ";
+                        std::cout << requested << " = ";
                         std::cout << cpu_handle.program_mem[value] << "\n";
                 }
-        } else if (reg_addr_map.find(cmd_tokens.at(1)) != reg_addr_map.end()) {
+        } else if (reg_addr_map.find(requested) != reg_addr_map.end()) {
                 // print register value
-                int16_t value = *reg_addr_map.at(cmd_tokens.at(1));
-                std::cout << cmd_tokens.at(1) << " = " << value << "\n";
+                int16_t value = *reg_addr_map.at(requested);
+                std::cout << requested << " = " << value << "\n";
         } else {
                 std::cout << "unrecognized value\n";
         }
@@ -286,34 +287,46 @@ void disassemble_print_instruction(
         out_stream << "#" << std::right << std::setw(4) << prog_ctr << ": ";
         out_stream << std::left << std::setw(7) << mnem_name;
 
+        const std::string REG_DEREFERENCE[13] = {
+                "RZ", "RA", "RB", "RC", "RD", "RE", "RF", "RG",
+                "RSP", "RIP", "CMP0", "CMP1"
+        };
+
         // second, the arguments
+        Instruction_Data curr_instruction = BLUEPRINTS.at(mnem_name);
         size_t ins_size = BLUEPRINTS.at(mnem_name).length;
         for (size_t arg_idx = 1; arg_idx < ins_size; ++arg_idx) {
                 std::string arg_string = "";
                 std::stringstream arg_stream;
                 int16_t curr_arg = instruction.at(arg_idx);
-                Instruction_Data curr_instruction = BLUEPRINTS.at(mnem_name);
                 Atom_Type arg_type = curr_instruction.blueprint.at(arg_idx);
-                if ((curr_arg >> 14) & 1) {
+
+                int16_t addr_bits = (curr_arg >> 12) & 7;
+                if ((curr_arg >> 14) == 1 || curr_arg < 0) {
                         // literal bitmask
-                        if (curr_arg >= 0 && ((curr_arg >> 14) & 1))
-                                curr_arg ^= (int16_t)(1 << 14);
+                        if (curr_arg >= 0)
+                                curr_arg ^= (int16_t)(4 << 12);
                         arg_stream << "$";
                         arg_stream << curr_arg;
-                } else if ((curr_arg >> 13) & 1) {
+                } else if (addr_bits == 1) {
                         // stack offset bitmask
-                        curr_arg ^= (int16_t)(1 << 13);
+                        curr_arg ^= (int16_t)(1 << 12);
                         arg_stream << "%";
                         arg_stream << curr_arg;
-                } else if ((curr_arg >> 12) & 1) {
+                } else if (addr_bits == 2) {
+                        // ram address
+                        curr_arg ^= (int16_t)(2 << 12);
+                        arg_stream << "[$";
+                        arg_stream << curr_arg;
+                        arg_stream << "]";
+                } else if (addr_bits == 3) {
                         // string literal
-                        curr_arg ^= (int16_t)(1 << 12);
+                        curr_arg ^= (int16_t)(3 << 12);
                         arg_stream << "#";
                         arg_stream << curr_arg;
-                } else if ((arg_type == REGISTER) || (arg_type == SOURCE)) {
+                } else if (arg_type == REGISTER && 0 <= curr_arg && curr_arg < 14) {
                         // register idx
-                        arg_stream << "R";
-                        arg_stream << (char)('A' + curr_arg);
+                        arg_stream << REG_DEREFERENCE[curr_arg];
                 } else {
                         // label
                         arg_stream << "#";

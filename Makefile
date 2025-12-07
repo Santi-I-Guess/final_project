@@ -100,10 +100,12 @@ submission: | $(BUILD_DIR)
 .DEFAULT: all
 
 # DEPENDENCIES
+build/assembler.o: src/assembler/assembler.cpp src/assembler/../common_values.h \
+ src/assembler/assembler.h src/assembler/tokenizer.h
 build/helper.o: src/assembler/helper.cpp src/assembler/../common_values.h \
  src/assembler/helper.h
-build/synthesis.o: src/assembler/synthesis.cpp src/assembler/../common_values.h \
- src/assembler/helper.h src/assembler/synthesis.h
+build/tokenizer.o: src/assembler/tokenizer.cpp src/assembler/../common_values.h \
+ src/assembler/helper.h src/assembler/tokenizer.h
 build/cmd_line_opts.o: src/misc/cmd_line_opts.cpp src/misc/cmd_line_opts.h
 build/file_handling.o: src/misc/file_handling.cpp src/misc/file_handling.h \
  src/misc/../common_values.h
@@ -117,8 +119,8 @@ build/pal_debugger.o: src/simulator/pal_debugger.cpp \
  src/simulator/pal_debugger.h src/simulator/cpu_handle.h \
  src/simulator/../common_values.h
 build/common_values.o: src/common_values.cpp src/common_values.h
-build/main.o: src/main.cpp src/assembler/synthesis.h \
- src/assembler/../common_values.h src/common_values.h \
- src/misc/cmd_line_opts.h src/misc/file_handling.h \
+build/main.o: src/main.cpp src/assembler/assembler.h \
+ src/assembler/../common_values.h src/assembler/tokenizer.h \
+ src/common_values.h src/misc/cmd_line_opts.h src/misc/file_handling.h \
  src/misc/../common_values.h src/simulator/cpu_handle.h \
  src/simulator/../common_values.h

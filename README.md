@@ -37,7 +37,8 @@ some changes to make usage simple.
 - can print integer values with PRINT, ascii characters with CPRINT, and
   string literals with SPRINT
 - can define labels with \<string\>:
-- can access stack without pop using stack offset addressing (see below)
+- stack addressing with "%n"
+- ram addressing with "\[$n\]"
 - can access stack pointer with RSP, and the instruction counter with RIP
 
 ## Instructions
@@ -70,8 +71,8 @@ some changes to make usage simple.
 | RET          |           |            |
 | PUSH         | src       |            |
 | POP          | dest      |            |
-| WRITE        | src       | addr (src) |
-| READ         | dest      | addr (src) |
+| WRITE        | src0      | src1       |
+| READ         | dest      | src1       |
 | PRINT        | src       |            |
 | SPRINT       | string    |            |
 | CPRINT       | src       |            |
@@ -99,7 +100,7 @@ Note: "$" in this case is not the start of a string, but the literal character \
 - every program is required to have a main label and at least one EXIT instruction
 - SPRINT supports newlines and escaped double quotes
 - INPUT supports single ascii characters and integers
-- values are clamped to \[-4096,4096\]
+- values are clamped to \[-16383,16383\]
 - there are 3000 addresses allotted to the program's runtime memory
 - the stack occupies the last 750 elements of RAM block, where the address
   2250 corresponds to %0 when no elements are on the stack

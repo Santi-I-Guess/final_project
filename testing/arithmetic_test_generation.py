@@ -48,7 +48,7 @@ registers = ["RA", "RB", "RC", "RD",
 max_value = 16383
 min_value = -16383
 
- 
+
 def clamp(result) -> int:
     if abs(result) < 1:
         result = 0
@@ -78,8 +78,8 @@ if __name__ == "__main__":
         operation = random.choice(MNEMONICS_LIST)
         # arg_1 = int(random.triangular(min_value, max_value))
         # arg_2 = int(random.triangular(min_value, max_value))
-        arg_1 = int(random.triangular(min_value, max_value))
-        arg_2 = int(random.triangular(min_value, max_value))
+        arg_1 = int(random.triangular(-200, -100))
+        arg_2 = int(random.triangular(-200, -100))
         if operation == "ADD":
             result = arg_1 + arg_2
             result = clamp(result)
@@ -101,40 +101,67 @@ if __name__ == "__main__":
 
         result = clamp(result)
         print("    ; next operation")
-        if operation == "NOT":
-            arg_1 = f"${arg_1}"
-            print(f"    {operation:<9} RA, {arg_1:>9}")
-        else:
-            arg_1 = f"${arg_1}"
-            arg_2 = f"${arg_2}"
-            print(f"    MOV RA, {arg_1:>9}")
-            print(f"    {operation:<9} RA, {arg_2:>9}")
-        print(f"    SPRINT \"{arg_1:<9} {operation_map[operation]} {arg_2:<9} = ${result:<6}\"")
-        print("    PUSH RA")
-        print("    CALL arrow_print")
-        # print("    check")
-        # print("    PUSH RA")
-        # print(f"    PUSH ${result}")
-        # print("    CALL check_value")
+        arg_1 = f"${arg_1}"
+        arg_2 = f"${arg_2}"
+        print(f"    SPRINT \"{arg_1:<9} {operation_map[operation]}", end="")
+        print(f" {arg_2:<9} = ${result:<6}\"")
+        if operation == "ADD":
+            print("    PUSH $0 ; add")
+        if operation == "SUB":
+            print("    PUSH $1 ; sub")
+        if operation == "MUL":
+            print("    PUSH $2 ; mul")
+        if operation == "DIV":
+            print("    PUSH $3 ; div")
+        print(f"    PUSH ${result:<8} ; expected")
+        print(f"    PUSH {arg_2:<9} ; arg_2")
+        print(f"    PUSH {arg_1:<9} ; arg_1")
+        print("    CALL test_oper")
+
     print("    EXIT")
-    print("""arrow_print:
-    ; %0 is the value calculated
-    SPRINT \"  -> \"
-    PRINT %0
-    CPRINT $10
-    POP RH ; dump parameter
-    RET""")
     print("""\
-check_value:
-    ; %0 -> RA is expected, %0 -> RB is actual
-    CMP %0, %1
+test_oper:
+    ; %0 is arg_1, %1 is arg_2, %2 is expected
+    ; %3 is operation: (0|1|2|3)=(add|sub|mul|div)
+    MOV RA, %0
+    MOV RB, %1
+    MOV RC, %2
+    MOV RD, %3
+    ; check operation to perform
+    CMP RD, $0
+    JEQ test_oper_add
+    CMP RD, $1
+    JEQ test_oper_sub
+    CMP RD, $2
+    JEQ test_oper_mul
+    JMP test_oper_div
+test_oper_add:
+    ADD RA, RB
+    JMP check
+test_oper_sub:
+    SUB RA, RB
+    JMP check
+test_oper_mul:
+    MUL RA, RB
+    JMP check
+test_oper_div:
+    DIV RA, RB
+check:
+    SPRINT "  -> $"
+    PRINT RA
+    CPRINT $10
+    CMP RA, RC
     JEQ final
     SPRINT "expected "
-    PRINT %0
-    SPRINT ", got "
-    PRINT %1
+    PRINT RC
+    SPRINT ", actual "
+    PRINT RA
     CPRINT $10
+    JMP final
 final:
-    POP RH ; dump parameters
-    POP RH
+    ; dump parameters
+    POP RZ
+    POP RZ
+    POP RZ
+    POP RZ
     RET""")

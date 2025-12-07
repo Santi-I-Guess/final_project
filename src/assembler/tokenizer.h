@@ -1,5 +1,5 @@
-#ifndef SYNTHESIS_H
-#define SYNTHESIS_H 1
+#ifndef TOKENIZER_H
+#define TOKENIZER_H 1
 
 #include <cstdint>
 #include <map>
@@ -8,6 +8,9 @@
 
 #include "../common_values.h"
 
+/**
+ * @brief defines possible grammar errors
+ */
 enum Grammar_Retval {
         ACCEPTABLE_E,
         EXPECTED_MNEMONIC_E,
@@ -19,19 +22,15 @@ enum Grammar_Retval {
         UNKNOWN_MNEMONIC_E,
 };
 
+/**
+ * @brief holds relevant debug information for erroneous user program
+ * @details helper struct for grammar_check
+ */
 struct Debug_Info {
         int line_num;
         Grammar_Retval grammar_retval;
         Token relevant_token;
 };
-
-/**
- * @brief assembles the final program into a vector of int16_t's
- */
-std::vector<int16_t> assemble_program(
-        const std::vector<Token> &tokens,
-        const std::map<std::string, int16_t> &label_map
-);
 
 /**
  * @brief obtains the addresses of user defined labels
@@ -52,11 +51,5 @@ Debug_Info grammar_check(
         const std::vector<Token> &tokens,
         const std::map<std::string, int16_t> &label_map
 );
-
-/**
- * @brief translates a single string into series of int16_t's with a null int16_t
- * @details helper function of assemble_program
- */
-std::vector<int16_t> translate_string(const std::string &stripped_token);
 
 #endif

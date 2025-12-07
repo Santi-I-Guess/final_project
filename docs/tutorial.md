@@ -151,8 +151,8 @@ instruction, or the program will refuse to assemble.
 | RET          |           |            | return                       |
 | PUSH         | src       |            | push(src)                    |
 | POP          | dest      |            | dest = pop()                 |
-| WRITE        | src       | addr (src) | ram\[addr\] = src            |
-| READ         | dest      | addr (src) | dest = ram\[addr\]           |
+| WRITE        | src0      | src1       | ram\[src1\] = src0           |
+| READ         | dest      | src1       | dest = ram\[src1\]           |
 | PRINT        | src       |            | print(src)                   |
 | SPRINT       | string    |            | print(string)                |
 | CPRINT       | src       |            | print((ascii)src)            |
@@ -168,14 +168,16 @@ tedious. For ease of programming, two other addressing modes are provided.
 
 ## Stack addressing: %N
 %N will return the Nth element from the top of the stack, where %0 returns the
-top of the stack (the same value as using POP). %N is a read only operation,
-meaning it will not pop the value used, nor affect the program.
-N must be a positive value within the value of 0 and the stack_ptr,
-or a runtime error will occur.
+top of the stack (the same value as using POP). N must be a positive value
+within the value of 0 and the current stack_ptr, or a runtime error will occur.
+
+## Ram addressing: \[$N\]
+\[$N\] will return the value of address $N in the ram block, with an address
+space of $0 to $2249. Going outside this range will cause a runtime error.
 
 ## Literal addressing: $N
 $N will return the literal value N, which may be any i16. N must be a valid
-i16 in the bounds of \[-4096, 4096\], or an assembler error will occur.
+i16 in the bounds of \[-16383, 16383\], or an assembler error will occur.
 
 # Program flags
 Certain command line flags are provided to the program executable to make
@@ -238,8 +240,8 @@ address in program memory / ram. Examples:
 - p RIP
 - p %0
 - p %1
-- p MEM\[0\]
-- p MEM\[100\]
+- p \[$0\]
+- p \[$100\]
 
 ## quit
 Quit the debugger, and exit the program

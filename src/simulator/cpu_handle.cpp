@@ -50,29 +50,38 @@ CPU_Handle::~CPU_Handle() {
 int16_t CPU_Handle::dereference_value(const int16_t given_value) {
         int16_t intended_address = 0;
         int16_t intended_value   = 0;
-        if ((given_value >> 14) & 1) {
+        int16_t addr_bits = (given_value >> 12) & 7;
+        if ((given_value >> 14) == 1 || given_value < 0) {
                 // literal value
+                // set addr bits off for non-negative numbers
                 intended_value = given_value;
                 if (intended_value >= 0)
-                        intended_value ^= (int16_t)(1 << 14);
-        } else if ((given_value >> 13) & 1) {
-                // stack offest
+                        intended_value ^= (int16_t)(4 << 12);
+        } else if (addr_bits == 1) {
+                // stack offset
                 intended_address = given_value;
-                intended_address ^= (int16_t)(1 << 13);
+                intended_address ^= (int16_t)(1 << 12);
                 if (intended_address > stack_ptr || stack_ptr <= 0) {
                         handle_runtime_error(INVALID_STACK_OFFSET);
                 }
-                // -1, because stack_ptr points to memory of next element,
-                // not top element
                 intended_value = program_mem[STACK_START + stack_ptr - intended_address - 1];
-        } else if ((given_value >> 12) & 1) {
+        } else if (addr_bits == 2) {
+                // ram address
+                intended_address = given_value;
+                intended_address ^= (int16_t)(2 << 12);
+                if (intended_address < 0 || intended_address >= STACK_START) {
+                        std::cout << "ram hotfix\n";
+                        handle_runtime_error(INVALID_STACK_OFFSET);
+                }
+                intended_value = program_mem[intended_address];
+        } else if (addr_bits == 3) {
                 // string literal
                 intended_value = given_value;
-                intended_value ^= (int16_t)(1 << 12);
+                intended_value ^= (int16_t)(3 << 12);
         } else {
                 // register idx
                 switch (given_value) {
-                case  0: intended_value = 0;         break;
+                case  0: intended_value = 0;         break; // zero reg
                 case  1: intended_value = reg_a;     break;
                 case  2: intended_value = reg_b;     break;
                 case  3: intended_value = reg_c;     break;
