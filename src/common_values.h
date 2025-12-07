@@ -6,10 +6,10 @@
 #include <vector>
 
 // stack size last 1/4 of the RAM
-#define RAM_SIZE          3000
-#define STACK_START       2250
-#define STACK_SIZE         750
-#define CALL_STACK_SIZE   2014
+#define RAM_SIZE          8192
+#define STACK_START       6144
+#define STACK_SIZE        2048
+#define CALL_STACK_SIZE   2048
 #define LIT_MIN_VALUE   -16383
 #define LIT_MAX_VALUE    16383
 

@@ -101,6 +101,6 @@ Note: "$" in this case is not the start of a string, but the literal character \
 - SPRINT supports newlines and escaped double quotes
 - INPUT supports single ascii characters and integers
 - values are clamped to \[-16383,16383\]
-- there are 3000 addresses allotted to the program's runtime memory
-- the stack occupies the last 750 elements of RAM block, where the address
-  2250 corresponds to %0 when no elements are on the stack
+- there are 8192 addresses allotted to the program's runtime memory
+- the stack occupies the last 2048 elements of RAM block, where the address
+  6144 corresponds to %0 when no elements are on the stack

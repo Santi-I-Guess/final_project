@@ -45,10 +45,10 @@ All registers, with the exception of RIP, are guarenteed to be set to 0 at
 the start of the program.
 
 # Memory
-In this simulator, you are given 3000 integers of memory outside of integers
+In this simulator, you are given 8192 integers of memory outside of integers
 to work with. This memory is split into the RAM, which takes up the first 3/4
-of that space (2250 integers), and the stack, which takes up the last 1/4 of
-the space (750 integers). The RAM can be freely written and read from,
+of that space (6144 integers), and the stack, which takes up the last 1/4 of
+the space (2048 integers). The RAM can be freely written and read from,
 provided an address within the RAM space. The stack can only have values
 pushed to the top of the stack, but can be read from either the top of the
 stack, or from an offset from the top of the stack. The stack has a dedicated
