@@ -303,7 +303,7 @@ void disassemble_print_instruction(
         Instruction_Data curr_instruction = BLUEPRINTS.at(mnem_name);
         size_t ins_size = BLUEPRINTS.at(mnem_name).length;
         for (size_t arg_idx = 1; arg_idx < ins_size; ++arg_idx) {
-                std::string arg_string = "";
+                std::string arg_string;
                 std::stringstream arg_stream;
                 int16_t curr_arg = instruction.at(arg_idx);
                 Atom_Type arg_type = curr_instruction.blueprint.at(arg_idx);
@@ -339,7 +339,7 @@ void disassemble_print_instruction(
                         arg_stream << "#";
                         arg_stream << curr_arg;
                 }
-                arg_string = arg_stream.str();
+                std::getline(arg_stream, arg_string);
                 out_stream << std::right << std::setw(8) << arg_string;
         }
 

@@ -10,7 +10,9 @@ USERNAME = santiago_sagastegui
 ARCHIVE_EXTENSION = zip
 
 # $(OS) is defined for windows machines, but not unix
-# also, why is -Force a positional flag? I really dislike powershell
+# also, why is -Force a positional flag? I really dislike Powershell
+# note to self: for some reason, on windows, -p and -Force are interpreted
+# as names instead of flags if they're not at the end
 ifeq ($(OS),Windows_NT)
 	TARGET = $(PROJECT).exe
 	DEL = del
@@ -54,18 +56,13 @@ all: first second
 first: | $(BUILD_DIR)
 second: $(TARGET)
 
-# note to self: makefiles understand forward slash for file seperators,
-#     but windows doesn't, so anything that runns commands needs os specific
-#     file path seperators
-# note to self: for some reason, on windows, -p and -Force are interpreted as names instead
-# of flags
 $(BUILD_DIR):
 	mkdir build
 
 # VPATH variable specifies list of directories to search for prerequisites,
 # if prerequisite is not in current directory
 VPATH = $(SRC_DIRS)
-build/%.o: %.cpp
+build/%.o: %.cpp | $(BUILD_DIR)
 	@echo "building $(notdir $<)"
 	@$(CXX) -o $@ -c $< $(CPPVERSION) $(CXXFLAGS_DEBUG) $(CXXFLAGS_WARN)
 
