@@ -173,7 +173,7 @@ loop_check_2() {
     printf "%s\n" "${program}" | ${executable}
     printf "\n"
 
-    printf "\x1b[32mExpect: Powers of 2, ascending, then descending\x1b[0m\n"
+    printf "\x1b[32mExpect: Powers of 2, ascending, then descending, bound by 16383\x1b[0m\n"
     program_2="\
         main:
             ; RB as ctr

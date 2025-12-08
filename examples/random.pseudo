@@ -1,11 +1,13 @@
+random_num:
+    RAND
+    SPRINT   "A random number is: "
+    PRINT    %0
+    CPRINT   $10
+    POP      RZ ; dump parameter
+    RET
+
 main:
-    RAND
-    RAND
-    RAND
-    PRINT %0
-    CPRINT $10
-    PRINT %1
-    CPRINT $10
-    PRINT %2
-    CPRINT $10
+    CALL random_num
+    CALL random_num
+    CALL random_num
     EXIT

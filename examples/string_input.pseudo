@@ -1,5 +1,6 @@
 main:
     PUSH RSP
+    SPRINT "Enter anything: "
     SINPUT
     ; calculate length
     MOV RA, RSP
@@ -16,11 +17,11 @@ main:
     SUB RSP, RA
     CPRINT $34 ; '"'
 next_letter:
-    CPRINT %0
-    CMP %0, $0
-    INC RSP
-    JNE next_letter
-    INC RSP ; move past null terminator
-    CPRINT $34 ; '"'
-    CPRINT $10
+    CPRINT   %0
+    CMP      %0, $0
+    INC      RSP
+    JNE      next_letter
+    INC      RSP ; move past null terminator
+    CPRINT   $34 ; '"'
+    CPRINT   $10
     EXIT

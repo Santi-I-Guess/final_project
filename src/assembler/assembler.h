@@ -4,8 +4,8 @@
 #include "../common_values.h"
 
 #include <cstdint>
-#include <vector>
 #include <map>
+#include <vector>
 
 /**
  * @brief assembles the final program into a vector of int16_t's
