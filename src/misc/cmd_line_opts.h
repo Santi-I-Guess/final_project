@@ -1,7 +1,6 @@
 #ifndef CMD_LINE_OPTS_H
 #define CMD_LINE_OPTS_H 1
 
-#include <cstdint>
 #include <vector>
 #include <string>
 #include <map>

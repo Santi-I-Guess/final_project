@@ -1,6 +1,9 @@
 #include <cctype>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
+#include <map>
+#include <vector>
 
 #include "../instruction_types.h"
 #include "../token_types.h"

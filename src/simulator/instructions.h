@@ -1,6 +1,8 @@
 #ifndef INSTRUCTIONS_H
 #define INSTRUCTIONS_H 1
 
+#include <cstdint>
+
 #include "cpu_handle.h"
 
 // functions to simulate instructions

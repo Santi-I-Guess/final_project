@@ -7,8 +7,10 @@
  * Also hosted at https://github.com/Santi-I-Guess/PAL-Assembler
  */
 
+#include <cstdint>
 #include <iostream>
 #include <random>
+#include <map>
 #include <sstream>
 #include <string>
 #include <string>

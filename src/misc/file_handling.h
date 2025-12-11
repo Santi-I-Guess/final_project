@@ -1,6 +1,7 @@
 #ifndef FILE_HANDLING_H
 #define FILE_HANDLING_H 1
 
+#include <cstdint>
 #include <vector>
 #include <map>
 #include <string>

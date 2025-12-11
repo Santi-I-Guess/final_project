@@ -1,7 +1,7 @@
 # Two cars in every pot and a chicken in every garage.
 
 CXX = g++
-CXXFLAGS_DEBUG = -g
+CXXFLAGS_DEBUG = -g -Wmissing-include-dirs
 CXXFLAGS_WARN  = -Wall
 CPPVERSION = -std=c++17
 USERNAME = santiago_sagastegui
