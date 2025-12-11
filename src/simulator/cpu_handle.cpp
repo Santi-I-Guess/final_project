@@ -15,9 +15,12 @@
 #endif
 
 #include "../common_values.h"
+#include "../instruction_types.h"
 #include "cpu_handle.h"
 #include "pal_debugger.h"
 #include "instructions.h"
+
+extern std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 CPU_Handle::CPU_Handle() {
         reg_a = 0;

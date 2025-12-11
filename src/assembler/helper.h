@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../common_values.h"
+#include "../instruction_types.h"
 
 /**
  * @brief checks if i matches equivalent regex pattern: [$%|a-zA-Z0-9_-]

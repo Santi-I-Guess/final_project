@@ -2,12 +2,15 @@
 #include <iomanip>
 #include <iostream>
 
+#include "../instruction_types.h"
+#include "../token_types.h"
 #include "pal_debugger.h"
 #include "cpu_handle.h"
-#include "../common_values.h"
 
 #define BOLD "\x1b[1m"
 #define CLEAR "\x1b[0m"
+
+extern std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 void pdb_handle_break(
         const std::vector<std::string> &cmd_tokens,

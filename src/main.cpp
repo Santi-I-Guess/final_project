@@ -14,12 +14,15 @@
 #include <string>
 #include <vector>
 
+#include "instruction_types.h"
+#include "token_types.h"
 #include "assembler/assembler.h"
 #include "assembler/tokenizer.h"
-#include "common_values.h"
 #include "misc/cmd_line_opts.h"
 #include "misc/file_handling.h"
 #include "simulator/cpu_handle.h"
+
+extern std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 /**
  * @brief stores error message for grammar errors in user programs
@@ -127,7 +130,6 @@ std::vector<int16_t> generate_program(
 
         // create the assembled program
         std::vector<int16_t> final_program = assemble_program(filtered_tokens, label_map);
-
         // if assemble_only flag is on, write binary to file and quit
         if (life_opts.assemble_only) {
                 bool res_temp;

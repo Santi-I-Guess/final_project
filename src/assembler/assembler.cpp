@@ -4,9 +4,11 @@
 #include <sstream>
 #include <vector>
 
-#include "../common_values.h"
+#include "../token_types.h"
+#include "../instruction_types.h"
 #include "assembler.h"
-#include "tokenizer.h"
+
+extern std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 std::vector<int16_t> assemble_program(
         const std::vector<Token> &tokens,

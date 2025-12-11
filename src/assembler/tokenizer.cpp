@@ -5,9 +5,11 @@
 #include <string>
 #include <vector>
 
-#include "../common_values.h"
+#include "../token_types.h"
 #include "helper.h"
 #include "tokenizer.h"
+
+extern std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 std::map<std::string, int16_t> create_label_map(
         const std::vector<Token> &tokens

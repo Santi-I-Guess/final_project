@@ -2,7 +2,12 @@
 #include <string>
 #include <vector>
 
-#include "common_values.h"
+#include "instruction_types.h"
+
+/**
+ * @brief hashmap that defines template of instructions in assembly language
+ */
+std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 Instruction_Data::Instruction_Data(
         int16_t given_opcode,

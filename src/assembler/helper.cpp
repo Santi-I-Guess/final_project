@@ -3,7 +3,11 @@
 #include <string>
 
 #include "../common_values.h"
+#include "../token_types.h"
+#include "../instruction_types.h"
 #include "helper.h"
+
+extern std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 bool is_valid_atom(const Atom_Type atom_type, const std::string &token) {
         bool first, second;

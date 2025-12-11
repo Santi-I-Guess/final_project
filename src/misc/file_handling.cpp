@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 
+#include "../token_types.h"
 #include "file_handling.h"
 
 void generate_intermediate_file(

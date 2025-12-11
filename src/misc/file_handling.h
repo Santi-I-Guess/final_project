@@ -6,7 +6,7 @@
 #include <string>
 #include <fstream>
 
-#include "../common_values.h"
+#include "../token_types.h"
 
 /**
  * @brief generates file of program's label_table and filtered_tokens

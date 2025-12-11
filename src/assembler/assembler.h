@@ -1,10 +1,11 @@
 #ifndef ASSEMBLER_H
 #define ASSEMBLER_H 1
 
-#include "../common_values.h"
+#include "../token_types.h"
 
 #include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 
 /**

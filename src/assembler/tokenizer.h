@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "../common_values.h"
+#include "../token_types.h"
 
 /**
  * @brief defines possible grammar errors
