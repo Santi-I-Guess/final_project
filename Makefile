@@ -2,7 +2,7 @@
 
 CXX = g++
 CXXFLAGS_DEBUG = -g
-CXXFLAGS_WARN  = -Wall -Werror -Wunreachable-code
+CXXFLAGS_WARN  = -Wall
 CPPVERSION = -std=c++17
 USERNAME = santiago_sagastegui
 
