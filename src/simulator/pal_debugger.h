@@ -1,5 +1,5 @@
-#ifndef DEBUG_FUNCS_H
-#define DEBUG_FUNCS_H 1
+#ifndef PAL_DEBUGGER_H
+#define PAL_DEBUGGER_H 1
 
 #include <cstdint>
 #include <string>

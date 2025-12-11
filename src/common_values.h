@@ -1,6 +1,7 @@
 #ifndef COMMON_VALUES_H
 #define COMMON_VALUES_H 1
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <vector>
@@ -62,54 +63,13 @@ struct Instruction_Data {
         std::vector<Atom_Type> blueprint;
         size_t length;
         Instruction_Data() = default;
-        Instruction_Data(
-                int16_t given_opcode,
-                std::string given_mnem_name,
-                std::vector<Atom_Type> given_blueprint
-        );
+        Instruction_Data(int16_t given_opcode, std::string given_mnem_name, std::vector<Atom_Type> given_blueprint);
 };
 
 /**
  * @brief hashmap that defines template of instructions in assembly language
  */
-const std::map<std::string, Instruction_Data> BLUEPRINTS = {
-        {"NOP",    Instruction_Data(0, "NOP",     {MNEMONIC})},
-        {"MOV",    Instruction_Data(1, "MOV",     {MNEMONIC, REGISTER, SOURCE})},
-        {"INC",    Instruction_Data(2, "INC",     {MNEMONIC, REGISTER})},
-        {"DEC",    Instruction_Data(3, "DEC",     {MNEMONIC, REGISTER})},
-        {"ADD",    Instruction_Data(4, "ADD",     {MNEMONIC, REGISTER, SOURCE})},
-        {"SUB",    Instruction_Data(5, "SUB",     {MNEMONIC, REGISTER, SOURCE})},
-        {"MUL",    Instruction_Data(6, "MUL",     {MNEMONIC, REGISTER, SOURCE})},
-        {"DIV",    Instruction_Data(7, "DIV",     {MNEMONIC, REGISTER, SOURCE})},
-        {"MOD",    Instruction_Data(8, "MOD",     {MNEMONIC, REGISTER, SOURCE})},
-        {"AND",    Instruction_Data(9, "AND",     {MNEMONIC, REGISTER, SOURCE})},
-        {"OR",     Instruction_Data(10, "OR",     {MNEMONIC, REGISTER, SOURCE})},
-        {"NOT",    Instruction_Data(11, "NOT",    {MNEMONIC, REGISTER, SOURCE})},
-        {"XOR",    Instruction_Data(12, "XOR",    {MNEMONIC, REGISTER, SOURCE})},
-        {"LSH",    Instruction_Data(13, "LSH",    {MNEMONIC, REGISTER, SOURCE})},
-        {"RSH",    Instruction_Data(14, "RSH",    {MNEMONIC, REGISTER, SOURCE})},
-        {"CMP",    Instruction_Data(15, "CMP",    {MNEMONIC, SOURCE,   SOURCE})},
-        {"JMP",    Instruction_Data(16, "JMP",    {MNEMONIC, LABEL})},
-        {"JEQ",    Instruction_Data(17, "JEQ",    {MNEMONIC, LABEL})},
-        {"JNE",    Instruction_Data(18, "JNE",    {MNEMONIC, LABEL})},
-        {"JGE",    Instruction_Data(19, "JGE",    {MNEMONIC, LABEL})},
-        {"JGR",    Instruction_Data(20, "JGR",    {MNEMONIC, LABEL})},
-        {"JLE",    Instruction_Data(21, "JLE",    {MNEMONIC, LABEL})},
-        {"JLS",    Instruction_Data(22, "JLS",    {MNEMONIC, LABEL})},
-        {"CALL",   Instruction_Data(23, "CALL",   {MNEMONIC, LABEL})},
-        {"RET",    Instruction_Data(24, "RET",    {MNEMONIC})},
-        {"PUSH",   Instruction_Data(25, "PUSH",   {MNEMONIC, SOURCE})},
-        {"POP",    Instruction_Data(26, "POP",    {MNEMONIC, REGISTER})},
-        {"WRITE",  Instruction_Data(27, "WRITE",  {MNEMONIC, SOURCE,   SOURCE})},
-        {"READ",   Instruction_Data(28, "READ",   {MNEMONIC, REGISTER, SOURCE})},
-        {"PRINT",  Instruction_Data(29, "PRINT",  {MNEMONIC, SOURCE})},
-        {"SPRINT", Instruction_Data(30, "SPRINT", {MNEMONIC, LITERAL_STR})},
-        {"CPRINT", Instruction_Data(31, "CPRINT", {MNEMONIC, SOURCE})},
-        {"INPUT",  Instruction_Data(32, "INPUT",  {MNEMONIC})},
-        {"SINPUT", Instruction_Data(33, "INPUT",  {MNEMONIC})},
-        {"RAND",   Instruction_Data(34, "RAND",   {MNEMONIC})},
-        {"EXIT",   Instruction_Data(35, "EXIT",   {MNEMONIC})},
-};
+std::map<std::string, Instruction_Data> BLUEPRINTS;
 
 /**
  * @brief hashmap for valid callable registers in assembly language

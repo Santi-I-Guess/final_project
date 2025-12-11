@@ -142,6 +142,82 @@ std::vector<int16_t> generate_program(
 }
 
 int main(int argc, char **argv) {
+        // batch create instructions
+        Instruction_Data B_NOP(0,     "NOP",     {MNEMONIC});
+        Instruction_Data B_MOV(1,     "MOV",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_INC(2,     "INC",     {MNEMONIC, REGISTER});
+        Instruction_Data B_DEC(3,     "DEC",     {MNEMONIC, REGISTER});
+        Instruction_Data B_ADD(4,     "ADD",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_SUB(5,     "SUB",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_MUL(6,     "MUL",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_DIV(7,     "DIV",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_MOD(8,     "MOD",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_AND(9,     "AND",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_OR(10,     "OR",      {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_NOT(11,    "NOT",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_XOR(12,    "XOR",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_LSH(13,    "LSH",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_RSH(14,    "RSH",     {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_CMP(15,    "CMP",     {MNEMONIC, SOURCE,   SOURCE});
+        Instruction_Data B_JMP(16,    "JMP",     {MNEMONIC, LABEL});
+        Instruction_Data B_JEQ(17,    "JEQ",     {MNEMONIC, LABEL});
+        Instruction_Data B_JNE(18,    "JNE",     {MNEMONIC, LABEL});
+        Instruction_Data B_JGE(19,    "JGE",     {MNEMONIC, LABEL});
+        Instruction_Data B_JGR(20,    "JGR",     {MNEMONIC, LABEL});
+        Instruction_Data B_JLE(21,    "JLE",     {MNEMONIC, LABEL});
+        Instruction_Data B_JLS(22,    "JLS",     {MNEMONIC, LABEL});
+        Instruction_Data B_CALL(23,   "CALL",    {MNEMONIC, LABEL});
+        Instruction_Data B_RET(24,    "RET",     {MNEMONIC});
+        Instruction_Data B_PUSH(25,   "PUSH",    {MNEMONIC, SOURCE});
+        Instruction_Data B_POP(26,    "POP",     {MNEMONIC, REGISTER});
+        Instruction_Data B_WRITE(27,  "WRITE",   {MNEMONIC, SOURCE,   SOURCE});
+        Instruction_Data B_READ(28,   "READ",    {MNEMONIC, REGISTER, SOURCE});
+        Instruction_Data B_PRINT(29,  "PRINT",   {MNEMONIC, SOURCE});
+        Instruction_Data B_SPRINT(30, "SPRINT",  {MNEMONIC, LITERAL_STR});
+        Instruction_Data B_CPRINT(31, "CPRINT",  {MNEMONIC, SOURCE});
+        Instruction_Data B_INPUT(32,  "INPUT",   {MNEMONIC});
+        Instruction_Data B_SINPUT(33, "SINPUT",  {MNEMONIC});
+        Instruction_Data B_RAND(34,   "RAND",    {MNEMONIC});
+        Instruction_Data B_EXIT(35,   "EXIT",    {MNEMONIC});
+
+        // load instructions at runtime into BLUEPRINTS global argument
+        BLUEPRINTS.insert({"NOP",    B_NOP});
+        BLUEPRINTS.insert({"MOV",    B_MOV});
+        BLUEPRINTS.insert({"INC",    B_INC});
+        BLUEPRINTS.insert({"DEC",    B_DEC});
+        BLUEPRINTS.insert({"ADD",    B_ADD});
+        BLUEPRINTS.insert({"SUB",    B_SUB});
+        BLUEPRINTS.insert({"MUL",    B_MUL});
+        BLUEPRINTS.insert({"DIV",    B_DIV});
+        BLUEPRINTS.insert({"MOD",    B_MOD});
+        BLUEPRINTS.insert({"AND",    B_AND});
+        BLUEPRINTS.insert({"OR",     B_OR});
+        BLUEPRINTS.insert({"NOT",    B_NOT});
+        BLUEPRINTS.insert({"XOR",    B_XOR});
+        BLUEPRINTS.insert({"LSH",    B_LSH});
+        BLUEPRINTS.insert({"RSH",    B_RSH});
+        BLUEPRINTS.insert({"CMP",    B_CMP});
+        BLUEPRINTS.insert({"JMP",    B_JMP});
+        BLUEPRINTS.insert({"JEQ",    B_JEQ});
+        BLUEPRINTS.insert({"JNE",    B_JNE});
+        BLUEPRINTS.insert({"JGE",    B_JGE});
+        BLUEPRINTS.insert({"JGR",    B_JGR});
+        BLUEPRINTS.insert({"JLE",    B_JLE});
+        BLUEPRINTS.insert({"JLS",    B_JLS});
+        BLUEPRINTS.insert({"CALL",   B_CALL});
+        BLUEPRINTS.insert({"RET",    B_RET});
+        BLUEPRINTS.insert({"PUSH",   B_PUSH});
+        BLUEPRINTS.insert({"POP",    B_POP});
+        BLUEPRINTS.insert({"WRITE",  B_WRITE});
+        BLUEPRINTS.insert({"READ",   B_READ});
+        BLUEPRINTS.insert({"PRINT",  B_PRINT});
+        BLUEPRINTS.insert({"SPRINT", B_SPRINT});
+        BLUEPRINTS.insert({"CPRINT", B_CPRINT});
+        BLUEPRINTS.insert({"INPUT",  B_INPUT});
+        BLUEPRINTS.insert({"SINPUT", B_SINPUT});
+        BLUEPRINTS.insert({"RAND",   B_RAND});
+        BLUEPRINTS.insert({"EXIT",   B_EXIT});
+
         Cmd_Options life_opts;
         life_opts.store_cmd_args(argc, argv);
         bool valid_cmd_arg_combo = life_opts.is_valid_args();
