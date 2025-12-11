@@ -22,8 +22,8 @@ multiple statements on a single line will not cause an error.
 Registers are the quickest way of handling data in an assembly language
 In PAL, you get 8 general purpose registers to freely read and write to:
 RA, RB, RC, ..., RH. Each of which stores a 16 bit signed integer, but
-due to bits 14, 13, and 12 being reserved for addressing modes, values
-will be clamped to \[-4096, 4096\].
+due to bits 14 and 13 being reserved for addressing modes, values
+will be clamped to \[-16383, 16383\].
 
 You also have access to some read only registers: RSP, the stack pointer;
 RIP, the instruction pointer; and CMP0 and CMP1, the comparison registers used

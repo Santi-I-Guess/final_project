@@ -1,3 +1,4 @@
+; create a large block of text with a chosen character
 check_value:
     ; %0 is value, %1 is row or columm (0|1)
     CMP %0, $0

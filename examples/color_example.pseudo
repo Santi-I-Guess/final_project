@@ -1,3 +1,4 @@
+; print a bunch of colored text to teh terminal
 main:
     SPRINT "\x1b[31m"
     SPRINT "This should be red\n"

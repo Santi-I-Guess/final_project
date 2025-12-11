@@ -15,6 +15,7 @@ struct Cmd_Options {
         bool intermediate_files; ///< -s
         bool is_binary_input;    ///< -b
         bool is_debug;           ///< -d
+        bool is_stdin;           ///< -S
         bool test_only;          ///< -t
 
         Cmd_Options();

@@ -15,6 +15,7 @@ some changes to make usage simple.
 - -d, --debug
 - -h, --help
 - -s, --save-temps
+- -S, --use-stdin
 - -t, --test-only
 
 ## PAL Debugger Commands
@@ -31,11 +32,12 @@ some changes to make usage simple.
 
 ## Assembly Language
 - 16 bit registers
-- 8 general purpose registers, 2 comparison registers (nonaccessable)
-- given 3000 address RAM with 4 memory access instructions (PUSH, POP, READ,
+- 8 general purpose registers, 2 comparison registers
+- given 8192 address RAM with 4 memory access instructions (PUSH, POP, READ,
   WRITE)
 - can print integer values with PRINT, ascii characters with CPRINT, and
   string literals with SPRINT
+- can take in user integer input with INPUT, and user string input with SINPUT
 - can define labels with \<string\>:
 - stack addressing with "%n" (see addressing modes)
 - ram addressing with "\[$n\]" (see addressing modesk)
@@ -96,9 +98,9 @@ WRITE $10, RB
 
 ## Other quirks
 - every program is required to have a main label and at least one EXIT instruction
-- SPRINT supports newlines and escaped double quotes
+- SPRINT supports newlines and escaped double quotes, very specifically "\n" and "\""
 - INPUT supports single ascii characters and integers
-- values are clamped to \[-16383,16383\]
+- register values are clamped to \[-16383,16383\]
 - there are 8192 addresses allotted to the program's runtime memory
 - the stack occupies the last 2048 elements of RAM block, where the address
   6144 corresponds to %0 when no elements are on the stack

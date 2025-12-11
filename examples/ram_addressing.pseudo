@@ -1,4 +1,4 @@
-
+; show off ram addressing mode
 main:
     WRITE $10, $0
     WRITE $9, $1

@@ -71,17 +71,21 @@ $(TARGET): $(OBJECTS)
 
 # Remove-Item (del) has some weird positional things going on
 clean: | $(BUILD_DIR)
-	@echo cleaning target
-	@$(DEL) $(TARGET) $(DEL_FLAGS)
-	@echo cleaning objects
-	@$(DEL) $(wildcard build/*.o) $(DEL_FLAGS)
+	$(DEL) $(TARGET) $(DEL_FLAGS)
+	$(DEL) $(wildcard build/*.o) $(DEL_FLAGS)
 
 
 depend:
 	@sed --in-place=.bak '/^# DEPENDENCIES$$/,$$d' Makefile
-	@$(DEL) sed* $(DEL_FLAGS)
 	@echo $(Q)# DEPENDENCIES$(Q) >> Makefile
-	@$(CXX) -MM $(SRC_FILES) | sed "s/\([a-z_]*.o:\)/build\/\1/g" >> Makefile
+	@$(CXX) -MM $(SRC_FILES) > sed_temp.txt
+	@# append build prefix to object file names
+	@sed --in-place "s#\([a-z_]\+\.o:\)#build/\1#" sed_temp.txt
+	@# remove weird ../ backtrack that gcc does with -MM
+	@# awk + realpath could probably solve this
+	@sed --in-place "s#/[a-z_]\+/\.\./#/#g" sed_temp.txt
+	@cat sed_temp.txt >> Makefile
+	@$(DEL) sed_temp.txt $(DEL_FLAGS)
 
 submission: | $(BUILD_DIR)
 	@echo "Creating submission file $(ZIP_NAME) ..."
@@ -96,27 +100,33 @@ submission: | $(BUILD_DIR)
 .DEFAULT: all
 
 # DEPENDENCIES
-build/assembler.o: src/assembler/assembler.cpp src/assembler/../common_values.h \
- src/assembler/assembler.h src/assembler/tokenizer.h
-build/helper.o: src/assembler/helper.cpp src/assembler/../common_values.h \
- src/assembler/helper.h
-build/tokenizer.o: src/assembler/tokenizer.cpp src/assembler/../common_values.h \
- src/assembler/helper.h src/assembler/tokenizer.h
+build/assembler.o: src/assembler/assembler.cpp src/token_types.h \
+ src/instruction_types.h src/token_types.h \
+ src/assembler/assembler.h
+build/helper.o: src/assembler/helper.cpp src/common_values.h \
+ src/token_types.h src/instruction_types.h \
+ src/token_types.h src/assembler/helper.h
+build/tokenizer.o: src/assembler/tokenizer.cpp src/token_types.h \
+ src/assembler/helper.h src/instruction_types.h \
+ src/token_types.h src/assembler/tokenizer.h
 build/cmd_line_opts.o: src/misc/cmd_line_opts.cpp src/misc/cmd_line_opts.h
-build/file_handling.o: src/misc/file_handling.cpp src/misc/file_handling.h \
- src/misc/../common_values.h
+build/file_handling.o: src/misc/file_handling.cpp src/token_types.h \
+ src/misc/file_handling.h
 build/cpu_handle.o: src/simulator/cpu_handle.cpp \
- src/simulator/../common_values.h src/simulator/cpu_handle.h \
+ src/common_values.h src/instruction_types.h \
+ src/token_types.h src/simulator/cpu_handle.h \
  src/simulator/pal_debugger.h src/simulator/instructions.h
 build/instructions.o: src/simulator/instructions.cpp \
- src/simulator/../common_values.h src/simulator/cpu_handle.h \
+ src/common_values.h src/simulator/cpu_handle.h \
  src/simulator/instructions.h
 build/pal_debugger.o: src/simulator/pal_debugger.cpp \
- src/simulator/pal_debugger.h src/simulator/cpu_handle.h \
- src/simulator/../common_values.h
-build/common_values.o: src/common_values.cpp src/common_values.h
-build/main.o: src/main.cpp src/assembler/assembler.h \
- src/assembler/../common_values.h src/assembler/tokenizer.h \
- src/common_values.h src/misc/cmd_line_opts.h src/misc/file_handling.h \
- src/misc/../common_values.h src/simulator/cpu_handle.h \
- src/simulator/../common_values.h
+ src/instruction_types.h src/token_types.h \
+ src/token_types.h src/simulator/pal_debugger.h \
+ src/simulator/cpu_handle.h src/common_values.h
+build/instruction_types.o: src/instruction_types.cpp src/instruction_types.h \
+ src/token_types.h
+build/main.o: src/main.cpp src/instruction_types.h src/token_types.h \
+ src/assembler/assembler.h src/token_types.h \
+ src/assembler/tokenizer.h src/misc/cmd_line_opts.h \
+ src/misc/file_handling.h src/token_types.h \
+ src/simulator/cpu_handle.h src/common_values.h

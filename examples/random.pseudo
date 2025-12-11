@@ -1,3 +1,4 @@
+; show off random number generation
 random_num:
     RAND
     SPRINT   "A random number is: "
